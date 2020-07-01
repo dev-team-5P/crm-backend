@@ -3,8 +3,10 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
+const pme = require("./routes/pme");
+
 mongoose
-  .connect("mongodb://localhost/gestion", {
+  .connect("mongodb://localhost/crm", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -16,6 +18,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+
+app.use("/pme", pme);
 
 const port = process.env.PORT || 3000;
 
