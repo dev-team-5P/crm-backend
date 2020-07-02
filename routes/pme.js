@@ -19,4 +19,25 @@ router.post("/register", async (req, res) => {
   res.send(pme);
 });
 
+router.post("/login", async (req, res) => {
+  const pme = await Pme.findOne({ email: req.body.email });
+  if (!pme) return res.send({ message: "wrong email or password" });
+
+  const validPass = await bcrypt.compare(req.body.password, pme.password);
+  if (!validPass) return res.send({ message: "wrong email or password" });
+
+  let token = jwt.sign(
+    {
+      data: {
+        _id: pme._id,
+        email: pme.email,
+        status: pme.status,
+      },
+    },
+    "secret"
+  );
+
+  res.send({ token: token });
+});
+
 module.exports = router;

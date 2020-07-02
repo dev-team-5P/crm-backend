@@ -5,6 +5,7 @@ const pmeSchema = new mongoose.Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },
   description: { type: String, required: true },
+  status: { type: Boolean, default: false },
   logo: String,
   telephone: Number,
   fax: Number,
