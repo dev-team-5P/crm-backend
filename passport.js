@@ -1,19 +1,19 @@
 const passport = require("passport");
 const BearerStrategy = require("passport-http-bearer").Strategy;
-const Pme = require("./models/pmeSchema");
+const Admin = require("./models/adminSchema");
 const jwt = require("jsonwebtoken");
 
 passport.use(
   new BearerStrategy((token, done) => {
     jwt.verify(token, "secret", (err, decoded) => {
-      Pme.findOne({ _id: decoded.data._id }, (err, pme) => {
-        if (!pme) {
+      Admin.findOne({ _id: decoded.data._id }, (err, admin) => {
+        if (!admin) {
           return done(null, false);
         }
         if (err) {
           return done(null, false);
         }
-        return done(null, { pme });
+        return done(null, { admin });
       });
     });
   })
