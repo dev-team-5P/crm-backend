@@ -1,7 +1,7 @@
 const express = require("express");
 const activity = require("../models/ActivitySchema");
 const router = express.Router();
-// const admin = require("../models/adminSchema"); 
+const admin = require("../models/adminSchema"); 
 passport = require("passport");
 
 //create new activity

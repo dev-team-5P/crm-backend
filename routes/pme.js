@@ -39,5 +39,10 @@ router.post("/login", async (req, res) => {
 
   res.send({ token: token });
 });
+// ****************api modification des données entreprises********//
+// router.put("/activity/:id" , function (req , res) {
+// let id = req.params.id;
+// Pme.findOne(_id : id)
+// });
 
 module.exports = router;
