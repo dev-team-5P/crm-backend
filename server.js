@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 require("./passport");
 
 const pme = require("./routes/pme");
+const user = require("./routes/user");
+const admin = require("./routes/admin");
 
 mongoose
   .connect("mongodb://localhost/crm", {
@@ -21,6 +23,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/pme", pme);
+app.use("/user", user);
+app.use("/admin", admin);
 
 const port = process.env.PORT || 3000;
 

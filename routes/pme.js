@@ -1,43 +1,89 @@
 const express = require("express");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
+const passport = require("passport");
 const Pme = require("../models/pmeSchema");
+const Admin = require("../models/adminSchema");
 
 const router = express.Router();
 
-// register pme //
-router.post("/register", async (req, res) => {
-  const pme = new Pme(req.body);
+// api getAll pme  //
+router.get(
+  "/",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
 
-  const unique = await Pme.findOne({ email: req.body.email }); // verifie si email est unique //
-  if (unique) return res.status(400).send({ message: "email already in use" });
+    if (admin.role !== "superAdmin")
+      return res.send({ message: "Unauthorized" });
 
-  const salt = await bcrypt.genSalt(10);
-  pme.password = await bcrypt.hash(pme.password, salt);
+    const pme = await Pme.find({}, { password: 0 });
 
-  await pme.save();
-  res.send(pme);
-});
+    res.send(pme);
+  }
+);
 
-router.post("/login", async (req, res) => {
-  const pme = await Pme.findOne({ email: req.body.email });
-  if (!pme) return res.send({ message: "wrong email or password" });
+// api get pme par id  //
+router.get(
+  "/:id",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
 
-  const validPass = await bcrypt.compare(req.body.password, pme.password);
-  if (!validPass) return res.send({ message: "wrong email or password" });
+    if (admin.role !== "superAdmin")
+      return res.send({ message: "Unauthorized" });
 
-  let token = jwt.sign(
-    {
-      data: {
-        _id: pme._id,
-        email: pme.email,
-        status: pme.status,
-      },
-    },
-    "secret"
-  );
+    const pme = await Pme.findById(req.params.id, { password: 0 });
+    res.send(pme);
+  }
+);
 
-  res.send({ token: token });
-});
+//post pme //
+router.post(
+  "/create-pme",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
+
+    if (!admin) return res.send({ message: "Unauthorized" });
+
+    const pme = new Pme(req.body);
+    await pme.save();
+
+    await Admin.findByIdAndUpdate(admin._id, { $push: { pme: pme._id } });
+    res.send(pme);
+  }
+);
+
+// api update pme //
+router.put(
+  "/edit/:id",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
+
+    if (!admin) return res.send({ message: "Unauthorized" }); // only admin and superAdmin can modify //
+
+    const verify = admin.pme.find((p) => p == req.params.id);
+
+    if (verify || admin.role === "superAdmin") {
+      const pme = await Pme.findByIdAndUpdate(req.params.id, req.body);
+      res.send(pme);
+    } else res.send({ message: "Unauthorized access" });
+  }
+);
+
+// api delete pme //
+router.delete(
+  "/delete/:id",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
+
+    if (admin.role !== "superAdmin")
+      return res.send({ message: "Unauthorized" });
+
+    await Pme.findByIdAndDelete(req.params.id);
+    res.send({ message: "pme deleted" });
+  }
+);
 
 module.exports = router;
