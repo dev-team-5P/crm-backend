@@ -6,12 +6,9 @@ const pme = require("./routes/pme");
 const activite = require("./routes/activity");
 require("./passport");
 
-<<<<<<< HEAD
 const pme = require("./routes/pme");
 const user = require("./routes/user");
 const admin = require("./routes/admin");
-=======
->>>>>>> e6142223e2e7b8cae8086770b287f47fdcbe2e1d
 
 // *************************** base de donnée*****************************************//
 mongoose
@@ -29,14 +26,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/pme", pme);
-<<<<<<< HEAD
 app.use("/user", user);
 app.use("/admin", admin);
-=======
 app.use("/activity", activite);
->>>>>>> e6142223e2e7b8cae8086770b287f47fdcbe2e1d
-
-
 
 // *********************** app listening*******************//
 const port = process.env.PORT || 3000;
