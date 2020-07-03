@@ -15,8 +15,20 @@ router.get(
     if (admin.role !== "superAdmin")
       return res.send({ message: "Unauthorized" });
 
-    const pme = await Pme.find({}, { password: 0 });
+    const pme = await Pme.find();
 
+    res.send(pme);
+  }
+);
+
+// get all pme by admin id //
+router.get(
+  "/list-pme/:adminId",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.params.adminId).populate("pme");
+
+    const pme = admin.pme;
     res.send(pme);
   }
 );
@@ -27,16 +39,16 @@ router.get(
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
+    const myPme = admin.pme.find((p) => p == req.params.id);
+    console.log(myPme);
 
-    if (admin.role !== "superAdmin")
-      return res.send({ message: "Unauthorized" });
-
-    const pme = await Pme.findById(req.params.id, { password: 0 });
-    res.send(pme);
+    if (admin.role == "superAdmin" || myPme) {
+      const pme = await Pme.findById(req.params.id);
+      res.send(pme);
+    } else return res.send({ message: "Unauthorized" });
   }
 );
 
-<<<<<<< HEAD
 //post pme //
 router.post(
   "/create-pme",
@@ -86,14 +98,5 @@ router.delete(
     res.send({ message: "pme deleted" });
   }
 );
-=======
-  res.send({ token: token });
-});
-// ****************api modification des données entreprises********//
-// router.put("/activity/:id" , function (req , res) {
-// let id = req.params.id;
-// Pme.findOne(_id : id)
-// });
->>>>>>> e6142223e2e7b8cae8086770b287f47fdcbe2e1d
 
 module.exports = router;
