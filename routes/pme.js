@@ -21,18 +21,31 @@ router.get(
   }
 );
 
+// get all pme by admin id //
+router.get(
+  "/list-pme/:adminId",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.params.adminId).populate("pme");
+
+    const pme = admin.pme;
+    res.send(pme);
+  }
+);
+
 // api get pme par id  //
 router.get(
   "/:id",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
+    const myPme = admin.pme.find((p) => p == req.params.id);
+    console.log(myPme);
 
-    if (admin.role !== "superAdmin")
-      return res.send({ message: "Unauthorized" });
-
-    const pme = await Pme.findById(req.params.id, { password: 0 });
-    res.send(pme);
+    if (admin.role == "superAdmin" || myPme) {
+      const pme = await Pme.findById(req.params.id);
+      res.send(pme);
+    } else return res.send({ message: "Unauthorized" });
   }
 );
 

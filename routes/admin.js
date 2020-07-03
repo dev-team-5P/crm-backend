@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const Admin = require("../models/adminSchema");
+const resetToken = require("./resetToken");
 
 const router = express.Router();
 
@@ -51,5 +52,9 @@ router.get(
     admins = await Admin.find({}, { password: 0 });
   }
 );
+
+router.post("/req-reset-password", resetToken.ResetPassword);
+router.post("/valid-password-token", resetToken.ValidPasswordToken);
+router.post("/new-password", resetToken.NewPassword);
 
 module.exports = router;
