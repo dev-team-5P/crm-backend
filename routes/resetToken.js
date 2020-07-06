@@ -33,8 +33,8 @@ module.exports = {
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: "create-email",
-          pass: "",
+          user: "crmproject.2020@gmail.com",
+          pass: "123456789crm",
         },
         tls: {
           rejectUnauthorized: false,
@@ -42,7 +42,7 @@ module.exports = {
       });
       const mailOptions = {
         to: user.email,
-        from: "create-email",
+        from: "crmproject.2020@gmail.com",
         subject: "Node.js Password Reset",
         text:
           "You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
