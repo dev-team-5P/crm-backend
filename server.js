@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const pme = require("./routes/pme");
+// const pme = require("./routes/pme");
 const activite = require("./routes/activity");
+const mail = require("./routes/mail");
 require("./passport");
 
 const pme = require("./routes/pme");
@@ -12,7 +13,7 @@ const admin = require("./routes/admin");
 
 // *************************** base de donnée*****************************************//
 mongoose
-  .connect("mongodb://localhost/crm", {
+  .connect("mongodb://localhost:27017/crm", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -29,6 +30,7 @@ app.use("/pme", pme);
 app.use("/user", user);
 app.use("/admin", admin);
 app.use("/activity", activite);
+app.use("/mail", mail);
 
 // *********************** app listening*******************//
 const port = process.env.PORT || 3000;
