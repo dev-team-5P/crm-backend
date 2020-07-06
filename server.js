@@ -4,11 +4,9 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const pme = require("./routes/pme");
 const activite = require("./routes/activity");
-require("./passport");
-
-const pme = require("./routes/pme");
 const user = require("./routes/user");
 const admin = require("./routes/admin");
+require("./passport");
 
 // *************************** base de donnée*****************************************//
 mongoose
@@ -28,7 +26,8 @@ app.use(cors());
 app.use("/pme", pme);
 app.use("/user", user);
 app.use("/admin", admin);
-app.use("/activity", activite);
+
+
 
 // *********************** app listening*******************//
 const port = process.env.PORT || 3000;

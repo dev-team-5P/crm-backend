@@ -8,12 +8,12 @@ const router = express.Router();
 // api getAll pme  //
 router.get(
   "/",
-  passport.authenticate("bearer", { session: false }),
+  // passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const admin = await Admin.findById(req.user.admin._id);
+    // const admin = await Admin.findById(req.user.admin._id);
 
-    if (admin.role !== "superAdmin")
-      return res.send({ message: "Unauthorized" });
+    // if (admin.role !== "superAdmin")
+    //   return res.send({ message: "Unauthorized" });
 
     const pme = await Pme.find();
 
@@ -27,7 +27,6 @@ router.get(
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.params.adminId).populate("pme");
-
     const pme = admin.pme;
     res.send(pme);
   }
