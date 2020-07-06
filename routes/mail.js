@@ -19,7 +19,7 @@ let mailTransporter = nodemailer.createTransport({
     } 
 });
     router.post('/sendmail', function(req,res){
-        User.findOne({'email': req.body.email}, function(err,User ) {
+        User.findOne({'users': req.body.email}, function(err,User ) {
     let mailDetails = { 
         from: '<amenbentoumi@gmail.com>', 
         to: User.email, // list of receivers
