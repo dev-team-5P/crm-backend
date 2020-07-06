@@ -27,7 +27,6 @@ router.get(
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.params.adminId).populate("pme");
-
     const pme = admin.pme;
     res.send(pme);
   }
