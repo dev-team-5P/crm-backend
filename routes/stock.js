@@ -1,7 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const multer = require("multer");
-const Stock = require("../models/stockScheam");
+const Stock = require("../models/stockSchema");
 const Pme = require("../models/pmeSchema");
 const User = require("../models/userSchema");
 
@@ -98,7 +98,6 @@ router.delete("/:domain/delete/:id", async (req, res) => {
 
   if (!user) return res.status(400).send({ message: "Unauthorized" });
   await Stock.findByIdAndDelete(req.params.id);
-
   res.send({ message: "product deleted" });
 });
 
