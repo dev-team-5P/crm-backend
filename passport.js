@@ -23,10 +23,10 @@ passport.use(
   new BearerStrategy(async (token, done) => {
     const tokenData = await jwt.verify(token, "secret");
     const admin = await Admin.findOne({ _id: tokenData.data._id });
+    if (admin) return done(null, { admin });
+    // done(null, false);
+
     const user = await User.findOne({ _id: tokenData.data._id });
-    if (!admin) {
-      done(null, false);
-    } else return done(null, { admin });
     if (!user) {
       return done(null, false);
     } else return done(null, { user });
