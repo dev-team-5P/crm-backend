@@ -12,6 +12,7 @@ const pmeSchema = new mongoose.Schema(
     tax: { type: Number, default: 18 },
     siege: String,
     activity: String,
+    domain: String,
   },
   { timestamps: true }
 );

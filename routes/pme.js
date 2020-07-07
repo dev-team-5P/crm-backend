@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const Pme = require("../models/pmeSchema");
 const Admin = require("../models/adminSchema");
+const { v4: uuidv4 } = require("uuid");
 
 const router = express.Router();
 
@@ -59,7 +60,10 @@ router.post(
     if (!admin) return res.send({ message: "Unauthorized" });
 
     const pme = new Pme(req.body);
+    const domain = uuidv4();
+
     await pme.save();
+    await Pme.findByIdAndUpdate(pme._id, { domain: domain });
 
     await Admin.findByIdAndUpdate(admin._id, { $push: { pme: pme._id } });
     res.send(pme);
