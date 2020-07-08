@@ -19,15 +19,14 @@ const router = express.Router();
 
 // create sock //
 router.post(
-  "/:domain/create",
+  "/:id/create",
   multer({ storage: storage }).single("image"),
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const domain = await Pme.findOne({ domain: req.params.domain });
+    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
 
-    if (!domain)
-      return res.status(400).send({ message: "Enter a correct http address" });
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
 
@@ -45,14 +44,13 @@ router.post(
 
 // get allStock //
 router.get(
-  "/:domain",
+  "/:id",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const domain = await Pme.findOne({ domain: req.params.domain });
+    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
 
-    if (!domain)
-      return res.status(400).send({ message: "Enter a correct http address" });
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
     const stocks = await Stock.find();
@@ -63,18 +61,18 @@ router.get(
 
 // get product by id //
 router.get(
-  "/:domain/:id",
+  "/:id/:prodId",
 
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const domain = await Pme.findOne({ domain: req.params.domain });
+    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
 
-    if (!domain)
-      return res.status(400).send({ message: "Enter a correct http address" });
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
-    const product = await Stock.findById(req.params.id);
+
+    const product = await Stock.findById(req.params.prodId);
 
     res.send(product);
   }
@@ -82,11 +80,18 @@ router.get(
 
 // modify product by its id //
 router.put(
-  "/:domain/edit/:id",
+  "/:id/edit/:prodId",
   multer({ storage: storage }).single("image"),
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const product = await Stock.findById(req.params.id);
+    const pme = await Pme.findById(req.params.id);
+    const user = await User.findById(req.user.user);
+
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+
+    if (!user) return res.status(400).send({ message: "Unauthorized" });
+
+    const product = await Stock.findById(req.params.prodId);
 
     const url = req.protocol + "://" + req.get("host");
     const imagePath = url + "/uploads/" + req.file.filename;
@@ -96,7 +101,7 @@ router.put(
       newStock.imagePath = imagePath;
     }
     const updatedProduct = await Stock.findByIdAndUpdate(
-      req.params.id,
+      req.params.prodId,
       newStock
     );
 
@@ -105,20 +110,21 @@ router.put(
 );
 
 // delete product by its id //
-router.delete("/:domain/delete/:id", async (req, res) => {
-  const domain = await Pme.findOne({ domain: req.params.domain });
+router.delete("/:id/delete/:prodId", async (req, res) => {
+  const pme = await Pme.findById(req.params.id);
   const user = await User.findById(req.user.user);
 
-  if (!domain)
-    return res.status(400).send({ message: "Enter a correct http address" });
+  if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
   if (!user) return res.status(400).send({ message: "Unauthorized" });
-  await Stock.findByIdAndDelete(req.params.id);
+
+  await Stock.findByIdAndDelete(req.params.prodId);
+
   res.send({ message: "product deleted" });
 });
 
 router.post(
-  "/:domain/notif-rupture/:id",
+  "/:id/notif-rupture/:id",
   passport.authenticate("bearer", { session: false }),
   notifRupture.notifyRupture
 );
