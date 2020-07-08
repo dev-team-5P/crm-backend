@@ -8,10 +8,10 @@ const stockSchema = new mongoose.Schema(
     stock: { type: Number, required: true },
     description: { type: String, required: true },
     prix: Number,
-    notifRupture: { type: Boolean, required: true },
+    // notifRupture: { type: Boolean, required: true },
     min: { type: Number, required: true },
     tax: Number,
-    categorie: { type: String, required: true },
+    // categorie: { type: String, required: true },
     pme: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pme",

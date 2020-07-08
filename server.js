@@ -11,6 +11,7 @@ const pme = require("./routes/pme");
 const user = require("./routes/user");
 const admin = require("./routes/admin");
 const stock = require("./routes/stock");
+const upload =require("./routes/upload")
 
 // *************************** base de donnée*****************************************//
 mongoose
@@ -35,6 +36,7 @@ app.use("/admin", admin);
 
 app.use("/activity", activite);
 app.use("/stock", stock);
+app.use("/uploadimg", upload);
 
 // *********************** app listening*******************//
 

@@ -6,21 +6,21 @@ const Pme = require("../models/pmeSchema");
 const User = require("../models/userSchema");
 const notifRupture = require("./mail-notif-rupture-stock");
 
-let storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
+// let storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "uploads");
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, file.originalname);
+//   },
+// });
 
 const router = express.Router();
 
 // create sock //
 router.post(
   "/:id/create",
-  multer({ storage: storage }).single("image"),
+  // multer({ storage: storage }).single("image"),
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const pme = await Pme.findById(req.params.id);
@@ -30,10 +30,11 @@ router.post(
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
 
-    const url = req.protocol + "://" + req.get("host");
-    const imagePath = url + "/uploads/" + req.file.filename;
+    // const url = req.protocol + "://" + req.get("host");
+    // const imagePath = url + "/uploads/" + req.file.filename;
     const newStock = req.body;
-    newStock.imagePath = imagePath;
+    newStock.pme = req.params.id
+    // newStock.imagePath = imagePath;
     const stock = new Stock(newStock);
 
     await stock.save();
@@ -81,7 +82,7 @@ router.get(
 // modify product by its id //
 router.put(
   "/:id/edit/:prodId",
-  multer({ storage: storage }).single("image"),
+  // multer({ storage: storage }).single("image"),
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const pme = await Pme.findById(req.params.id);
@@ -93,8 +94,8 @@ router.put(
 
     const product = await Stock.findById(req.params.prodId);
 
-    const url = req.protocol + "://" + req.get("host");
-    const imagePath = url + "/uploads/" + req.file.filename;
+    // const url = req.protocol + "://" + req.get("host");
+    // const imagePath = url + "/uploads/" + req.file.filename;
     const newStock = req.body;
 
     if (product.imagePath != imagePath) {
