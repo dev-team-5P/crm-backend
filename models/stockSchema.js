@@ -5,6 +5,7 @@ const stockSchema = new mongoose.Schema(
     name: { type: String, required: true },
     imagePath: String,
     ref: String,
+    stock: { type: Number, required: true },
     description: { type: String, required: true },
     prix: Number,
     notifRupture: { type: Boolean, required: true },
