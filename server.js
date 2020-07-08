@@ -1,12 +1,16 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const pme = require("./routes/pme");
+const bodyParser = require("body-parser");
+require("./passport");
+// const swaggerUi = require("swagger-ui-express");
+// const swaggerDocument = require("./swagger.json");
+
 const activite = require("./routes/activity");
+const pme = require("./routes/pme");
 const user = require("./routes/user");
 const admin = require("./routes/admin");
-require("./passport");
+const stock = require("./routes/stock");
 
 // *************************** base de donnée*****************************************//
 mongoose
@@ -18,18 +22,39 @@ mongoose
   .catch((err) => console.log("error", err));
 //*********************************************************************************** */
 const app = express();
+// const swaggerExpress = require("express-swagger-generator")(app);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/pme", pme);
 app.use("/user", user);
 app.use("/admin", admin);
 
-
+app.use("/activity", activite);
+app.use("/stock", stock);
 
 // *********************** app listening*******************//
+
+// let options = {
+//   swaggerDefinition: {
+//     info: {
+//       description: "This is a sample server",
+//       title: "Swagger",
+//       version: "1.0.0",
+//     },
+//     host: "localhost:3000",
+//     produces: ["application/json", "application/xml"],
+//     schemes: ["http", "https"],
+//   },
+//   basedir: __dirname, //app absolute path
+//   files: ["./routes/*.js"], //Path to the API handle folder
+// };
+// console.log(__dirname);
+
+// swaggerExpress(options);
 const port = process.env.PORT || 3000;
 app.set("port", port);
 app.listen(port);

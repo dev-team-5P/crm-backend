@@ -21,6 +21,15 @@ router.post("/register", async (req, res) => {
 
   res.send(admin);
 });
+// /**
+//  * This function comment is parsed by doctrine
+//  * @route POST /admin/login
+//  * @group Admin - Operations about admin
+//  * @param {string} email.body.required -  email - eg: userdomain
+//  * @param {string} password.body.required - user's password.
+//  * @returns {object} 200 - JWT user Token
+//  * @returns {Error}  default - wrong email or password
+//  */
 
 // api login admin //
 router.post("/login", async (req, res) => {
@@ -44,12 +53,22 @@ router.post("/login", async (req, res) => {
   res.send({ token: token });
 });
 
+// /**
+//  * This function comment is parsed by doctrine
+//  * @route GET /admin
+//  * @group foo - Operations about user
+//  * @returns {object} 200 - An array of user info
+//  * @security JWT
+//  * @headers {string} Authorization - 	date in UTC when token expires
+//  * @returns {Error}  default - Unexpected error
+//  */
 // get allAdmins api //
 router.get(
   "/",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     admins = await Admin.find({}, { password: 0 });
+    res.send(admins);
   }
 );
 

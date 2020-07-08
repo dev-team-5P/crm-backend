@@ -29,15 +29,15 @@ router.post("/:domain/register", async (req, res) => {
 
 // api login user //
 router.post("/:domain/login", async (req, res) => {
-  const domain = await Pme.findOne({ domain: req.params.domain });
+  // const domain = await Pme.findOne({ domain: req.params.domain });
+  const user = await User.findOne({ email: req.body.email }).populate("pme");
+  const domain = user.pme.domain;
 
   if (!domain)
-    return res.status(400).send({ message: "Enter a correct http address" });
-
-  const user = await User.findOne({ email: req.body.email });
-
-  if (domain._id.toString() != user.pme.toString())
     return res.status(401).send({ message: "not registered in this pme" });
+
+  if (domain != req.params.domain)
+    return res.status(400).send({ message: "Enter a correct http address" });
 
   if (!user)
     return res.status(400).send({ message: "wrong email or password" }); // verification validité email //
@@ -63,6 +63,7 @@ router.post("/:domain/login", async (req, res) => {
 // get allUsers api //
 router.get("/", async (req, res) => {
   users = await User.find({}, { password: 0 });
+  res.send(users);
 });
 
 module.exports = router;

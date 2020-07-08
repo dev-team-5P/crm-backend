@@ -4,6 +4,7 @@ const multer = require("multer");
 const Stock = require("../models/stockSchema");
 const Pme = require("../models/pmeSchema");
 const User = require("../models/userSchema");
+const notifRupture = require("./mail-notif-rupture-stock");
 
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -115,5 +116,11 @@ router.delete("/:domain/delete/:id", async (req, res) => {
   await Stock.findByIdAndDelete(req.params.id);
   res.send({ message: "product deleted" });
 });
+
+router.post(
+  "/:domain/notif-rupture/:id",
+  passport.authenticate("bearer", { session: false }),
+  notifRupture.notifyRupture
+);
 
 module.exports = router;
