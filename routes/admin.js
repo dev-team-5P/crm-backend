@@ -68,6 +68,7 @@ router.post("/login", async (req, res) => {
           _id: user._id,
           email: user.email,
           role: user.role,
+          pme: user.pme,
         },
       },
       "secret"
