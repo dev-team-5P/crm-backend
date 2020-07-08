@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const Admin = require("../models/adminSchema");
+const User = require("../models/userSchema");
 const resetToken = require("./resetToken");
 
 const router = express.Router();
@@ -34,23 +35,46 @@ router.post("/register", async (req, res) => {
 // api login admin //
 router.post("/login", async (req, res) => {
   const admin = await Admin.findOne({ email: req.body.email });
-  if (!admin) return res.send({ message: "wrong email or password" }); // verification validité email //
-
-  const validPass = await bcrypt.compare(req.body.password, admin.password);
-  if (!validPass) return res.send({ message: "wrong email or password" }); // vrification validité password //
-
-  let token = jwt.sign(
-    {
-      data: {
-        _id: admin._id,
-        email: admin.email,
-        role: admin.role,
+  const user = await User.findOne({ email: req.body.email });
+  if (admin) {
+    const validPassAdmin = await bcrypt.compare(
+      req.body.password,
+      admin.password
+    );
+    if (!validPassAdmin)
+      return res.send({ message: "wrong email or password 2" }); // vrification validité password //
+    let token = jwt.sign(
+      {
+        data: {
+          _id: admin._id,
+          email: admin.email,
+          role: admin.role,
+        },
       },
-    },
-    "secret"
-  );
+      "secret"
+    );
 
-  res.send({ token: token });
+    res.send({ token: token, message: "admin" });
+  } else if (user) {
+    const validPassUser = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+    if (!validPassUser)
+      return res.send({ message: "wrong email or password 2" }); // vrification validité password //
+    let token = jwt.sign(
+      {
+        data: {
+          _id: user._id,
+          email: user.email,
+          role: user.role,
+        },
+      },
+      "secret"
+    );
+
+    res.send({ token: token, message: "user" });
+  } else return res.send({ message: "wrong email or password 1" }); // verification validité email //
 });
 
 // /**
