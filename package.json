@@ -22,10 +22,6 @@
     "nodemailer": "^6.4.10",
     "passport": "^0.4.1",
     "passport-http-bearer": "^1.0.1",
-    "swagger-ui-express": "^4.1.4",
     "uuid": "^8.2.0"
-  },
-  "devDependencies": {
-    "express-swagger-generator": "^1.1.17"
   }
 }

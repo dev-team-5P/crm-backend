@@ -6,8 +6,13 @@ const pme = require("./routes/pme");
 const activite = require("./routes/activity");
 const user = require("./routes/user");
 const admin = require("./routes/admin");
+
+const stock = require("./routes/stock");
+const upload =require("./routes/upload")
+
 const fournis = require("./routes/fourni")
 require("./passport");
+
 
 // *************************** base de donnée*****************************************//
 mongoose
@@ -28,6 +33,11 @@ app.use("/pme", pme);
 app.use("/user", user);
 app.use("/admin", admin);
 app.use("/fournis", fournis);
+
+
+app.use("/activity", activite);
+app.use("/stock", stock);
+app.use("/uploadimg", upload);
 
 
 // *********************** app listening*******************//
