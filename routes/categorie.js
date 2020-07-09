@@ -23,6 +23,42 @@ router.post("/add/:id",passport.authenticate("bearer", { session: false }),async
 
     res.send(Categorie);
 })
+/***********get All Categories ************* */
+router.get('/get/:id',passport.authenticate("bearer", { session: false }),async(req,res)=>{
+    const pme = await Pme.findById(req.params.id);
+    const user = await User.findById(req.user.user);  
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+
+    if (!user) return res.status(400).send({ message: "Unauthorized" });
+
+    const Categorie = await categorie.find()
+
+    res.send(Categorie);
+})
+/*************get categorie by id ************ */
+router.get('/:id/get/:idcat',passport.authenticate("bearer", { session: false }),async(req,res)=>{
+    const pme = await Pme.findById(req.params.id);
+    const user = await User.findById(req.user.user);
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+
+    if (!user) return res.status(400).send({ message: "Unauthorized" });
+
+    const Categorie = await categorie.findById(req.params.idcat);
+
+    res.send(Categorie);
+})
+/***************delete categorie ***************** */
+router.delete('/:id/delete/:idcat',passport.authenticate("bearer", { session: false }),async(req,res)=>{
+    const pme = await Pme.findById(req.params.id);
+    const user = await User.findById(req.user.user);
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+
+    if (!user) return res.status(400).send({ message: "Unauthorized" });
+
+    await categorie.findByIdAndDelete(req.params.idcat);
+
+    res.send({ message: "categorie deleted" });
+})
 
 
 module.exports = router;
