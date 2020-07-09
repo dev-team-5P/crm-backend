@@ -35,6 +35,7 @@ router.post(
     // const imagePath = url + "/uploads/" + req.file.filename;
     const newStock = req.body;
     newStock.pme = req.params.id;
+    newStock.user = req.user.user._id;
     // newStock.imagePath = imagePath;
     const stock = new Stock(newStock);
     const notif = new NotifMail();
@@ -58,7 +59,7 @@ router.get(
     if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
-    const stocks = await Stock.find();
+    const stocks = await Stock.find({ pme: req.params.id });
 
     res.send(stocks);
   }
