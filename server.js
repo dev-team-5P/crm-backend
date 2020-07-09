@@ -2,8 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const pme = require("./routes/pme");
 const activite = require("./routes/activity");
+const pme = require("./routes/pme");
 const user = require("./routes/user");
 const admin = require("./routes/admin");
 
@@ -27,6 +27,7 @@ mongoose
 //*********************************************************************************** */
 const app = express();
 
+// *************************** view engine setup*****************************************/
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
@@ -36,7 +37,10 @@ app.use('/upload',express.static(path.join(__dirname, 'upload')));
 app.use("/pme", pme);
 app.use("/user", user);
 app.use("/admin", admin);
+
+
 app.use("/fournis", fournis);
+
 
 
 app.use("/activity", activite);
