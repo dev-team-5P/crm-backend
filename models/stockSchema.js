@@ -11,7 +11,7 @@ const stockSchema = new mongoose.Schema(
     notifRupture: { type: Boolean, default: true },
     min: { type: Number, required: true },
     tax: Number,
-    // categorie: { type: String, required: true },
+    categorie: { type: String, required: true },
     pme: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pme",
