@@ -33,7 +33,7 @@ router.post(
     // const url = req.protocol + "://" + req.get("host");
     // const imagePath = url + "/uploads/" + req.file.filename;
     const newStock = req.body;
-    newStock.pme = req.params.id
+    newStock.pme = req.params.id;
     // newStock.imagePath = imagePath;
     const stock = new Stock(newStock);
 
@@ -111,21 +111,25 @@ router.put(
 );
 
 // delete product by its id //
-router.delete("/:id/delete/:prodId", async (req, res) => {
-  const pme = await Pme.findById(req.params.id);
-  const user = await User.findById(req.user.user);
+router.delete(
+  "/:id/delete/:prodId",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const pme = await Pme.findById(req.params.id);
+    const user = await User.findById(req.user.user);
 
-  if (!pme) return res.status(400).send({ message: "pme does not exist" });
+    if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
-  if (!user) return res.status(400).send({ message: "Unauthorized" });
+    if (!user) return res.status(400).send({ message: "Unauthorized" });
 
-  await Stock.findByIdAndDelete(req.params.prodId);
+    await Stock.findByIdAndDelete(req.params.prodId);
 
-  res.send({ message: "product deleted" });
-});
+    res.send({ message: "product deleted" });
+  }
+);
 
 router.post(
-  "/:id/notif-rupture/:id",
+  "/:id/notif-rupture/:prodId",
   passport.authenticate("bearer", { session: false }),
   notifRupture.notifyRupture
 );

@@ -1,11 +1,13 @@
 const nodemailer = require("nodemailer");
 const Stock = require("../models/stockSchema");
 const User = require("../models/userSchema");
+const NotifyMail = require("../models/notifSchema");
 
 module.exports = {
   async notifyRupture(req, res) {
-    const product = await Stock.findById(req.params.id);
+    const product = await Stock.findById(req.params.prodId);
     const user = await User.findById(req.user.user);
+    const notif = await NotifyMail.findOne({ produit: product._id });
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -24,8 +26,12 @@ module.exports = {
       text: `You are receiving this because ${product.name} has reached the minimal value of ${product.min}`,
     };
 
-    if (product.min == product.stock) {
+    if (product.min == product.stock && notif.send == true) {
       transporter.sendMail(mailOptions, (err, info) => {});
+      await NotifyMail.findOneAndUpdate(
+        { produit: product._id },
+        { send: false }
+      );
     }
     res.send({
       message: "check your stock",

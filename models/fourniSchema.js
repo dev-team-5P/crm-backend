@@ -1,19 +1,21 @@
 var mongoose = require("mongoose");
 var fourni = new mongoose.Schema({
-   
-   nom:String,
-   email:String,
-   adresse:String,
-   codepostal:String,
-   article:String,
-   ville:String,
-   pays:String,
-   Telportable :String,
-   fixe:String,
-   user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-    },
-})
+  name: String,
+  email: String,
+  addresse: String,
+  codepostal: String,
+  ville: String,
+  pays: String,
+  Telportable: Number,
+  fixe: Number,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  pme: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Pme",
+  },
+});
 
-module.exports = mongoose.model("fourni", fourni)   
+module.exports = mongoose.model("fourni", fourni);
