@@ -3,12 +3,19 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const activite = require("./routes/activity");
-const fournisseur = require ("./routes/fournisseur");
-// const path = require('path');
 const pme = require("./routes/pme");
 const user = require("./routes/user");
 const admin = require("./routes/admin");
+
+const stock = require("./routes/stock");
+const upload =require("./routes/upload");
+const categorie = require("./routes/categorie")
+const path = require('path')
+
+const fournis = require("./routes/fourni")
 require("./passport");
+
+
 // *************************** base de donnée*****************************************//
 mongoose
   .connect("mongodb://localhost/crm", {
@@ -24,15 +31,22 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/upload',express.static(path.join(__dirname, 'upload')));
 
 app.use("/pme", pme);
 app.use("/user", user);
 app.use("/admin", admin);
-app.use("/activity", activite);
-app.use("/fournisseur", fournisseur);
-// app.post('/confirmation', userController.confirmationPost);// token confirmation
- 
 
+
+app.use("/fournis", fournis);
+
+
+
+app.use("/activity", activite);
+app.use("/stock", stock);
+app.use("/uploadimg", upload);
+app.use("/categorie", categorie)
 
 
 // *********************** app listening*******************//
