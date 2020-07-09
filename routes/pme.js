@@ -40,7 +40,7 @@ router.get(
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
     const myPme = admin.pme.find((p) => p == req.params.id);
-    console.log(myPme);
+    console.log(typof( myPme));
 
     if (admin.role == "superAdmin" || myPme) {
       const pme = await Pme.findById(req.params.id);

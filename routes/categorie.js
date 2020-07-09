@@ -31,7 +31,7 @@ router.get('/get/:id',passport.authenticate("bearer", { session: false }),async(
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
 
-    const Categorie = await categorie.find()
+    const Categorie = await categorie.find({pme: req.params.id})
 
     res.send(Categorie);
 })
