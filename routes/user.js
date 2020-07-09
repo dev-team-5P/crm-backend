@@ -26,38 +26,8 @@ router.post("/:id/register", async (req, res) => {
   res.send(user);
 });
 
-// api login user //
-// router.post("/:domain/login", async (req, res) => {
-//   // const domain = await Pme.findOne({ domain: req.params.domain });
-//   const user = await User.findOne({ email: req.body.email }).populate("pme");
-//   const domain = user.pme.domain;
-
-//   if (!domain)
-//     return res.status(401).send({ message: "not registered in this pme" });
-
-//   if (domain != req.params.domain)
-//     return res.status(400).send({ message: "Enter a correct http address" });
-
-//   if (!user)
-//     return res.status(400).send({ message: "wrong email or password" }); // verification validité email //
-
-//   const validPass = await bcrypt.compare(req.body.password, user.password);
-//   if (!validPass)
-//     return res.status(400).send({ message: "wrong email or password" }); // vrification validité password //
-
-//   let token = jwt.sign(
-//     {
-//       data: {
-//         _id: user._id,
-//         email: user.email,
-//         role: user.role,
-//       },
-//     },
-//     "secret"
-//   );
-
-//   res.send({ token: token });
-// });
+// edit user //
+router.put("");
 
 // get allUsers api //
 router.get("/", async (req, res) => {

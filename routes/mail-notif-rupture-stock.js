@@ -5,9 +5,8 @@ const NotifyMail = require("../models/notifSchema");
 
 module.exports = {
   async notifyRupture(req, res) {
-    const product = await Stock.findById(req.params.prodId);
-    const user = await User.findById(req.user.user);
-    const notif = await NotifyMail.findOne({ produit: product._id });
+    const users = await User.find({ role: "mag" });
+    const stock = await Stock.find();
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -19,24 +18,34 @@ module.exports = {
         rejectUnauthorized: false,
       },
     });
-    const mailOptions = {
-      to: user.email,
-      from: "crmproject.2020@gmail.com",
-      subject: "Node.js Stock Rupture Notification",
-      text: `You are receiving this because ${product.name} has reached the minimal value of ${product.min}`,
-    };
 
-    if (product.min == product.stock && notif.send == true) {
-      transporter.sendMail(mailOptions, (err, info) => {});
-      await NotifyMail.findOneAndUpdate(
-        { produit: product._id },
-        { send: false }
-      );
-    }
-    res.send({
-      message: "check your stock",
-      stock: product.stock,
-      min: product.min,
+    users.forEach((user) => {
+      stock.forEach(async (product) => {
+        const mailOptions = {
+          to: user.email,
+          from: "crmproject.2020@gmail.com",
+          subject: "Node.js Stock Rupture Notification",
+          text: `You are receiving this because ${product.name} has reached the minimal value of ${product.min}`,
+        };
+        let notif = await NotifyMail.findOne({ produit: product._id });
+        if (
+          product.min == product.stock &&
+          notif.send == true &&
+          product.notifRupture == true
+        ) {
+          return await transporter.sendMail(mailOptions, async (err, info) => {
+            await NotifyMail.findOneAndUpdate(
+              { produit: product._id },
+              { send: false }
+            );
+          });
+        }
+        //   res.send({
+        //     message: "check your stock",
+        //     stock: product.stock,
+        //     min: product.min,
+        //   });
+      });
     });
   },
 };

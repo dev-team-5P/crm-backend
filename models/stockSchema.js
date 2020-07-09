@@ -8,7 +8,7 @@ const stockSchema = new mongoose.Schema(
     stock: { type: Number, required: true },
     description: { type: String, required: true },
     prix: Number,
-    // notifRupture: { type: Boolean, required: true },
+    notifRupture: { type: Boolean, default: true },
     min: { type: Number, required: true },
     tax: Number,
     // categorie: { type: String, required: true },
