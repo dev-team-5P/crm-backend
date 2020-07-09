@@ -5,6 +5,7 @@ const user = new mongoose.Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },
   role: String,
+  isVerified: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("User", user);
