@@ -5,6 +5,7 @@ const Stock = require("../models/stockSchema");
 const Pme = require("../models/pmeSchema");
 const User = require("../models/userSchema");
 const notifRupture = require("./mail-notif-rupture-stock");
+const NotifMail = require("../models/notifSchema");
 
 // let storage = multer.diskStorage({
 //   destination: function (req, file, cb) {
@@ -36,8 +37,11 @@ router.post(
     newStock.pme = req.params.id;
     // newStock.imagePath = imagePath;
     const stock = new Stock(newStock);
+    const notif = new NotifMail();
 
     await stock.save();
+    await notif.save();
+    await NotifMail.findByIdAndUpdate(notif._id, { produit: stock._id });
 
     res.send(stock);
   }
@@ -93,6 +97,7 @@ router.put(
     if (!user) return res.status(400).send({ message: "Unauthorized" });
 
     const product = await Stock.findById(req.params.prodId);
+    const notif = await NotifMail.findOne({ produit: product._id });
 
     // const url = req.protocol + "://" + req.get("host");
     // const imagePath = url + "/uploads/" + req.file.filename;
