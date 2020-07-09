@@ -8,7 +8,9 @@ const user = require("./routes/user");
 const admin = require("./routes/admin");
 
 const stock = require("./routes/stock");
-const upload =require("./routes/upload")
+const upload =require("./routes/upload");
+const categorie = require("./routes/categorie")
+const path = require('path')
 
 const fournis = require("./routes/fourni")
 require("./passport");
@@ -28,6 +30,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/upload',express.static(path.join(__dirname, 'upload')));
 
 app.use("/pme", pme);
 app.use("/user", user);
@@ -38,6 +42,7 @@ app.use("/fournis", fournis);
 app.use("/activity", activite);
 app.use("/stock", stock);
 app.use("/uploadimg", upload);
+app.use("/categorie", categorie)
 
 
 // *********************** app listening*******************//

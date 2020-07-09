@@ -1,10 +1,10 @@
 const express = require("express");
 const passport = require("passport");
-const multer = require("multer");
+// const multer = require("multer");
 const Stock = require("../models/stockSchema");
 const Pme = require("../models/pmeSchema");
 const User = require("../models/userSchema");
-const notifRupture = require("./mail-notif-rupture-stock");
+// const notifRupture = require("./mail-notif-rupture-stock");
 const NotifMail = require("../models/notifSchema");
 
 // let storage = multer.diskStorage({
@@ -47,7 +47,7 @@ router.post(
   }
 );
 
-// get allStock //
+// get pme Stock //
 router.get(
   "/:id",
   passport.authenticate("bearer", { session: false }),
@@ -86,7 +86,6 @@ router.get(
 // modify product by its id //
 router.put(
   "/:id/edit/:prodId",
-  // multer({ storage: storage }).single("image"),
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const pme = await Pme.findById(req.params.id);
@@ -103,13 +102,13 @@ router.put(
     // const imagePath = url + "/uploads/" + req.file.filename;
     const newStock = req.body;
 
-    if (product.imagePath != imagePath) {
-      newStock.imagePath = imagePath;
-    }
     const updatedProduct = await Stock.findByIdAndUpdate(
       req.params.prodId,
       newStock
     );
+
+    if (updatedProduct.stock > updatedProduct.min)
+      await NotifMail.findByIdAndUpdate(notif._id, { send: true });
 
     res.send(updatedProduct);
   }
@@ -127,16 +126,17 @@ router.delete(
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
 
-    await Stock.findByIdAndDelete(req.params.prodId);
+    const product = await Stock.findByIdAndDelete(req.params.prodId);
+    await NotifMail.findOneAndDelete({ produit: product._id });
 
     res.send({ message: "product deleted" });
   }
 );
 
-router.post(
-  "/:id/notif-rupture/:prodId",
-  passport.authenticate("bearer", { session: false }),
-  notifRupture.notifyRupture
-);
+// router.post(
+//   "/:id/notif-rupture/:prodId",
+//   passport.authenticate("bearer", { session: false }),
+//   notifRupture.notifyRupture
+// );
 
 module.exports = router;
