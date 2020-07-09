@@ -82,7 +82,6 @@ router.get(
 // modify product by its id //
 router.put(
   "/:id/edit/:prodId",
-  // multer({ storage: storage }).single("image"),
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const pme = await Pme.findById(req.params.id);
@@ -92,15 +91,9 @@ router.put(
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
 
-    const product = await Stock.findById(req.params.prodId);
-
-    // const url = req.protocol + "://" + req.get("host");
-    // const imagePath = url + "/uploads/" + req.file.filename;
     const newStock = req.body;
 
-    if (product.imagePath != imagePath) {
-      newStock.imagePath = imagePath;
-    }
+   
     const updatedProduct = await Stock.findByIdAndUpdate(
       req.params.prodId,
       newStock
@@ -111,7 +104,9 @@ router.put(
 );
 
 // delete product by its id //
-router.delete("/:id/delete/:prodId", async (req, res) => {
+router.delete("/:id/delete/:prodId",
+passport.authenticate("bearer", { session: false }),
+ async (req, res) => {
   const pme = await Pme.findById(req.params.id);
   const user = await User.findById(req.user.user);
 
