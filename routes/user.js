@@ -77,7 +77,7 @@ router.get("/", async (req, res) => {
   res.send(users);
 });
 router.get("/:id", (req, res) => {
-  User.findOne({pme: req.params.id}, (err, resultat) => {
+  User.findById(req.params.id, (err, resultat) => {
     if (err){
 
       res.send(err);
@@ -86,6 +86,15 @@ router.get("/:id", (req, res) => {
         res.send(resultat)
       }
   })
+});
+router.put("/putuser/:id",function (req, res) {
+  User.findByIdAndUpdate( req.params.id,req.body,function (err,resultat ) {
+      if (err) res.send(err); 
+          else {
+            res.send(resultat)
+          }
+  
+  });
 });
 
 
