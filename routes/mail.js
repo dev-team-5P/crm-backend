@@ -1,7 +1,7 @@
-const express = require("express");
-const mailer = require("nodemailer");
-const ejs = require("ejs");
+// const express = require("express");
+// const mailer = require("nodemailer");
+// const ejs = require("ejs");
 
-router = express.Router();
+// router = express.Router();
 
-module.exports = router;
+// module.exports = router;

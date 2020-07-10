@@ -36,7 +36,6 @@ router.get(
   }
 );
 
-<<<<<<< HEAD
 //post pme //
 router.post(
   "/create-pme",
@@ -48,7 +47,6 @@ router.post(
 
     const pme = new Pme(req.body);
     await pme.save();
-
     await Admin.findByIdAndUpdate(admin._id, { $push: { pme: pme._id } });
     res.send(pme);
   }
@@ -86,14 +84,5 @@ router.delete(
     res.send({ message: "pme deleted" });
   }
 );
-=======
-  res.send({ token: token });
-});
-// ****************api modification des données entreprises********//
-// router.put("/activity/:id" , function (req , res) {
-// let id = req.params.id;
-// Pme.findOne(_id : id)
-// });
->>>>>>> e6142223e2e7b8cae8086770b287f47fdcbe2e1d
 
 module.exports = router;

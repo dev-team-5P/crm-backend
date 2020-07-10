@@ -11,6 +11,12 @@ adminSchema = new mongoose.Schema({
       ref: "Pme",
     },
   ],
+// Activity: [
+//   {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "Activity",
+//   },
+// ],
 });
 
 module.exports = mongoose.model("Admin", adminSchema);
