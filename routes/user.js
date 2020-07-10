@@ -96,6 +96,14 @@ router.put("/putuser/:id",function (req, res) {
   
   });
 });
-
+router.delete("/deleteuser/:id",function(req,res){
+  User.findByIdAndRemove(req.params.id,(err,resultat)=>{
+    if (err)
+    res.send(err)
+    else{
+      res.send(resultat)
+    }
+  })
+})
 
 module.exports = router;
