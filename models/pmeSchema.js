@@ -12,12 +12,13 @@ const pmeSchema = new mongoose.Schema(
     tax: { type: Number, default: 18 },
     siege: String,
     activity: String,
-    fournisseur: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Fournisseur",
-      },
-    ],
+    // fournisseur: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Fournisseur",
+    //   },
+    // ],
+    domain: String,
   },
   { timestamps: true }
 );
