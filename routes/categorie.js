@@ -38,7 +38,9 @@ router.get(
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
 
+
     const Categorie = await categorie.find({ pme: req.params.id });
+
 
     res.send(Categorie);
   }

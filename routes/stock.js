@@ -66,8 +66,10 @@ router.get(
     if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
+
     const stocks = await stockQuery;
     const stockCount = await Stock.countDocuments({ pme: req.params.id });
+
 
     res.send({ stocks: stocks, count: stockCount });
   }

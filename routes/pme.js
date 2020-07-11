@@ -54,6 +54,7 @@ router.get(
     const admin = await Admin.findById(req.user.admin._id);
     const myPme = admin.pme.find((p) => p == req.params.id);
 
+
     if (admin.role == "superAdmin" || myPme) {
       const pme = await Pme.findById(req.params.id);
       res.send(pme);
