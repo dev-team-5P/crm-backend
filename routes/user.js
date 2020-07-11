@@ -1,8 +1,12 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const passport = require("passport");
+const nodemailer = require("nodemailer");
 const User = require("../models/userSchema");
+
+const Token = require("../models/tokenSchema");
+const config = require("../config/config-mail.json");
+
 const Pme = require("../models/pmeSchema");
 
 const router = express.Router();
@@ -25,51 +29,117 @@ router.post("/:id/register", async (req, res) => {
 
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
-
   await user.save();
-  await User.findByIdAndUpdate(user._id, {
-    $push: {
-      pme: pme._id
-    }
-  });
+
+
+  await User.findByIdAndUpdate(user._id, { $push: { pme: pme._id } });
+
 
   res.send(user);
+  const token_access = jwt.sign(
+    {
+      data: {
+        _id: user._id,
+        email: user.email,
+      },
+    },
+    "secret"
+  );
+  let token = new Token({
+    _userId: user.id,
+    token: token_access
+  });
+
+  // Save the verification token
+  token.save(function (err) {
+    if (err) {
+      return res.status(500).send({ msg: err.message });
+    };
+  });
+
+  //Creating a Nodemailer Transport instance
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    tls: {
+      rejectUnauthorized: false
+    },
+    port: 465,
+    secure: false,
+    auth: {
+      user: config.mail,
+      pass: config.password
+    },
+  });
+  const mailOptions = {
+    from: config.mail,
+    to: user.email,
+    subject: 'Account Verification Token',
+    text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/'
+      +
+      `${config.frontend}`
+      +
+      token.token + '.\n'
+  };
+  transporter.sendMail(mailOptions, function (err) {
+    if (err) { return res.status(500).send({ msg: err.message }); }
+    res.status(200).send('A verification email has been sent to ' + user.email + '.');
+  });
+});
+//******************************** */ Token Confirmation api******************************* //
+
+router.post('/confirmation', async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) return res.send({ message: "wrong email or password" }); // verification validité email //
+
+  const validPass = await bcrypt.compare(req.body.password, user.password);
+  if (!validPass) return res.send({ message: "wrong email or password" }); // vrification validité password //
+  // Find a matching token
+  Token.findOne({ token: req.body.token }, function (err, token) {
+    if (!token) return res.status(400).send({ type: 'not-verified', msg: 'We were unable to find a valid token. Your token my have expired.' });
+    // If we found a token, find a matching user
+    User.findOne({ _id: token._userId, email: req.body.email }, function (err, user) {
+      if (!user) return res.status(400).send({ msg: 'We were unable to find a user for this token.' });
+      if (user.isVerified) return res.status(400).send({ type: 'already-verified', msg: 'This user has already been verified.' });
+      // Verify and save the user
+      user.isVerified = true;
+      console.log(user.isVerified);
+      user.save(function (err) {
+        if (err) { return res.status(500).send({ msg: err.message }); }
+        res.status(200).send("The account has been verified. Please log in.");
+      });
+      console.log(user);
+      // send back an email to admin 
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        tls: {
+          rejectUnauthorized: false
+        },
+        port: 465,
+        secure: false,
+        auth: {
+          user: config.mail,
+          pass: config.password
+        }
+      });
+      const mailOptions = {
+        from: user.email, to: config.mail, subject: 'New account',
+        text: 'Hello,\n\n' + 'There is a new account created by:\n' + 'Pme name: ' + user.name + '.\n'
+          + 'Pme Email: ' + user.email + '.'
+      };
+      transporter.sendMail(mailOptions, function (err) {
+        if (err) { return res.status(500).send({ msg: err.message }); }
+        res.status(200).send('A vnotification email has been sent to ' + user.email + '.');
+      });
+    });
+  });
 });
 
-// api login user //
-// router.post("/:domain/login", async (req, res) => {
-//   // const domain = await Pme.findOne({ domain: req.params.domain });
-//   const user = await User.findOne({ email: req.body.email }).populate("pme");
-//   const domain = user.pme.domain;
 
-//   if (!domain)
-//     return res.status(401).send({ message: "not registered in this pme" });
+// edit user //
+router.put("");
 
-//   if (domain != req.params.domain)
-//     return res.status(400).send({ message: "Enter a correct http address" });
 
-//   if (!user)
-//     return res.status(400).send({ message: "wrong email or password" }); // verification validité email //
-
-//   const validPass = await bcrypt.compare(req.body.password, user.password);
-//   if (!validPass)
-//     return res.status(400).send({ message: "wrong email or password" }); // vrification validité password //
-
-//   let token = jwt.sign(
-//     {
-//       data: {
-//         _id: user._id,
-//         email: user.email,
-//         role: user.role,
-//       },
-//     },
-//     "secret"
-//   );
-
-//   res.send({ token: token });
-// });
-
-// get allUsers api //
+//******************************** */ get allUsers api******************************* //
 router.get("/", async (req, res) => {
   users = await User.find({}, {
     password: 0

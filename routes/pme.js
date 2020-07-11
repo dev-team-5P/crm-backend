@@ -2,23 +2,29 @@ const express = require("express");
 const passport = require("passport");
 const Pme = require("../models/pmeSchema");
 const Admin = require("../models/adminSchema");
-const { v4: uuidv4 } = require("uuid");
 
 const router = express.Router();
 
 // api getAll pme  //
 router.get(
   "/",
-  // passport.authenticate("bearer", { session: false }),
+  passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    // const admin = await Admin.findById(req.user.admin._id);
+    const admin = await Admin.findById(req.user.admin._id);
 
-    // if (admin.role !== "superAdmin")
-    //   return res.send({ message: "Unauthorized" });
+    if (admin.role !== "superAdmin")
+      return res.send({ message: "Unauthorized" });
 
-    const pme = await Pme.find();
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    const pmeQuery = Pme.find();
 
-    res.send(pme);
+    if (pageSize && currentPage) {
+      pmeQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+    }
+    const pme = await pmeQuery;
+    const pmeCount = await Pme.countDocuments();
+    res.send({ pme: pme, count: pmeCount });
   }
 );
 
@@ -27,9 +33,16 @@ router.get(
   "/list-pme/:adminId",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const admin = await Admin.findById(req.params.adminId).populate("pme");
-    const pme = admin.pme;
-    res.send(pme);
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    const pmeQuery = Pme.find({ admin: req.params.adminId });
+
+    if (pageSize && currentPage) {
+      pmeQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+    }
+    const pme = await pmeQuery;
+    const pmeCount = await Pme.countDocuments({ admin: req.params.adminId });
+    res.send({ pme: pme, count: pmeCount });
   }
 );
 
@@ -40,7 +53,6 @@ router.get(
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
     const myPme = admin.pme.find((p) => p == req.params.id);
-    console.log(myPme);
 
     if (admin.role == "superAdmin" || myPme) {
       const pme = await Pme.findById(req.params.id);
@@ -59,10 +71,9 @@ router.post(
     if (!admin) return res.send({ message: "Unauthorized" });
 
     const pme = new Pme(req.body);
-    const domain = uuidv4();
 
     await pme.save();
-    await Pme.findByIdAndUpdate(pme._id, { domain: domain });
+    await Pme.findByIdAndUpdate(pme._id, { admin: admin._id });
 
     await Admin.findByIdAndUpdate(admin._id, { $push: { pme: pme._id } });
     res.send(pme);
@@ -95,7 +106,7 @@ router.delete(
     const admin = await Admin.findById(req.user.admin._id);
 
     if (admin.role !== "superAdmin")
-      return res.send({ message: "Unauthorized" });
+      return res.status(401).send({ message: "Unauthorized" });
 
     await Pme.findByIdAndDelete(req.params.id);
     res.send({ message: "pme deleted" });
