@@ -15,9 +15,16 @@ router.get(
     if (admin.role !== "superAdmin")
       return res.send({ message: "Unauthorized" });
 
-    const pme = await Pme.find();
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    const pmeQuery = Pme.find();
 
-    res.send(pme);
+    if (pageSize && currentPage) {
+      pmeQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+    }
+    const pme = await pmeQuery;
+    const pmeCount = await Pme.countDocuments();
+    res.send({ pme: pme, count: pmeCount });
   }
 );
 
