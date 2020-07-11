@@ -5,8 +5,7 @@ const NotifyMail = require("../models/notifSchema");
 
 module.exports = {
   async notifyRupture(req, res) {
-    const users = await User.find({ role: "mag" });
-    const stock = await Stock.find();
+    const stock = await Stock.find().populate("user");
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -19,8 +18,9 @@ module.exports = {
       },
     });
 
-    users.forEach((user) => {
-      stock.forEach(async (product) => {
+    stock.forEach(async (product) => {
+      let user = product.user;
+      if (user.email != null && user.email != undefined) {
         const mailOptions = {
           to: user.email,
           from: "crmproject.2020@gmail.com",
@@ -28,8 +28,9 @@ module.exports = {
           text: `You are receiving this because ${product.name} has reached the minimal value of ${product.min}`,
         };
         let notif = await NotifyMail.findOne({ produit: product._id });
+
         if (
-          product.min == product.stock &&
+          product.min >= product.stock &&
           notif.send == true &&
           product.notifRupture == true
         ) {
@@ -40,12 +41,12 @@ module.exports = {
             );
           });
         }
-        //   res.send({
-        //     message: "check your stock",
-        //     stock: product.stock,
-        //     min: product.min,
-        //   });
-      });
+      }
+      //   res.send({
+      //     message: "check your stock",
+      //     stock: product.stock,
+      //     min: product.min,
+      //   });
     });
   },
 };
