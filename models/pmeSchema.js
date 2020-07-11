@@ -13,6 +13,10 @@ const pmeSchema = new mongoose.Schema(
     siege: String,
     activity: String,
     domain: String,
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
   },
   { timestamps: true }
 );

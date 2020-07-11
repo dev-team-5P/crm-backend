@@ -21,8 +21,17 @@ router.get(
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const user = await User.findById(req.user.user._id);
-    const fourni = await Fourni.find({ pme: user.pme });
-    res.send(fourni);
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    const fournisQuery = Fourni.find({ pme: user.pme });
+
+    if (pageSize && currentPage) {
+      fournisQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+    }
+    const fournis = await fournisQuery;
+    const fournisCount = await Fourni.countDocuments({ pme: user.pme });
+
+    res.send({ fournis: fournis, count: fournisCount });
   }
 );
 
