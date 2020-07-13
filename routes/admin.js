@@ -42,7 +42,7 @@ router.post("/login", async (req, res) => {
       admin.password
     );
     if (!validPassAdmin)
-      return res.send({ message: "wrong email or password 2" }); // vrification validité password //
+      return res.send({ message: "wrong email or password 'admin'" }); // vrification validité password //
     let token = jwt.sign(
       {
         data: {
@@ -61,7 +61,7 @@ router.post("/login", async (req, res) => {
       user.password
     );
     if (!validPassUser)
-      return res.send({ message: "wrong email or password 2" }); // vrification validité password //
+      return res.send({ message: "wrong email or password 'user'" }); // vrification validité password //
     let token = jwt.sign(
       {
         data: {
@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
     );
 
     res.send({ token: token, message: "user" });
-  } else return res.send({ message: "wrong email or password 1" }); // verification validité email //
+  } else return res.send({ message: "wrong email or password both" }); // verification validité email //
 });
 
 // /**
