@@ -36,7 +36,7 @@ router.get("/findall", function (req, res) {
 });
 // create findOne
 router.get("/findone/:id", function (req, res) {
-    var id = req.params.id;
+    const id = req.params.id;
     Activity.findById(id, (err, resultat) => {
         if (err) res.send({
             message: "Could not find activity with id=" + id
@@ -45,8 +45,25 @@ router.get("/findone/:id", function (req, res) {
     })
 });
 // create update by id api 
+// router.put(
+//     "/update/:id",
+//     passport.authenticate("bearer", { session: false }),
+//     async (req, res) => {
+//       let id = req.params.id;
+//       const Activity = await Activity.findById(id);
+  
+//       if (!Activity) return res.send({ message: "Unauthorized" }); // only admin and superAdmin can modify //
+  
+//       const verify = admin.Activity.find((p) => p == req.params.id);
+  
+//       if (verify || admin.role === "superAdmin") {
+//         const Activity = await Activity.findByIdAndUpdate(req.params.id, req.body);
+//         res.send(Activity);
+//       } else res.send({ message: "Unauthorized access" });
+//     }
+//   );   +  Activity  to admin schema
 router.put("/update/:id", function (req, res) {
-    var id = req.params.id;
+    const id = req.params.id;
     Activity.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
         .then(data => {
             if (!data) {
@@ -63,7 +80,7 @@ router.put("/update/:id", function (req, res) {
 })
 // create delete by id api 
 router.delete("/delete/:id", function (req, res) {
-    var id = req.params.id;
+    const id = req.params.id;
     Activity.findByIdAndRemove(id, (err, resultat) => {
         if (err) res.send({
             message: "Could not delete activity with id=" + id

@@ -16,6 +16,7 @@ router.post("/:id/register", async (req, res) => {
   const user = new User(req.body);
 
   const pme = await Pme.findById(req.params.id);
+
   if (!pme)
     return res.status(400).send({
       message: "pme does not exist",
@@ -28,6 +29,7 @@ router.post("/:id/register", async (req, res) => {
     return res.status(400).send({
       message: "email already in use",
     });
+
 
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
@@ -169,8 +171,10 @@ router.post("/confirmation", async (req, res) => {
   });
 });
 
+
 // edit user //
 router.put("");
+
 
 //******************************** */ get allUsers api******************************* //
 router.get(
