@@ -19,6 +19,10 @@ const pmeSchema = new mongoose.Schema(
     //   },
     // ],
     domain: String,
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
   },
   { timestamps: true }
 );
