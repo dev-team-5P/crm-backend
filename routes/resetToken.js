@@ -18,6 +18,7 @@ module.exports = {
     const resetToken = new ResetToken({
       _adminId: user._id,
       resetToken: crypto.randomBytes(16).toString("hex"),
+      code: Math.floor(Math.random() * 1000),
     });
     resetToken.save(function (err) {
       if (err) {
@@ -29,7 +30,10 @@ module.exports = {
       })
         .remove()
         .exec();
-      res.status(200).json({ message: "Reset Password successfully." });
+      res.status(200).send({
+        message: "Reset Password successfully.",
+        token: resetToken.resetToken,
+      });
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -46,9 +50,8 @@ module.exports = {
         subject: "Node.js Password Reset",
         text:
           "You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
-          "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
-          "http://localhost:4200/response-reset-password/" +
-          resetToken.resetToken +
+          "Please copy this code" +
+          resetToken.code +
           "\n\n" +
           "If you did not request this, please ignore this email and your password will remain unchanged.\n",
       };
@@ -56,11 +59,12 @@ module.exports = {
     });
   },
   async ValidPasswordToken(req, res) {
-    if (!req.body.resetToken) {
+    if (!req.body.code) {
       return res.status(500).json({ message: "Token is required" });
     }
     const user = await ResetToken.findOne({
-      resetToken: req.body.resetToken,
+      code: req.body.code,
+      resetToken: req.query.token,
     });
     if (!user) {
       return res.status(409).json({ message: "Invalid URL" });
@@ -74,7 +78,7 @@ module.exports = {
       });
   },
   async NewPassword(req, res) {
-    ResetToken.findOne({ resetToken: req.body.resetToken }, function (
+    ResetToken.findOne({ resetToken: req.query.token }, function (
       err,
       userToken,
       next
