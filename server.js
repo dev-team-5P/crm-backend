@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const cron = require("node-cron");
 
 const activite = require("./routes/activity");
-
+const pme = require("./routes/pme")
 const user = require("./routes/user");
 const admin = require("./routes/admin");
 const { notifyRupture } = require("./routes/mail-notif-rupture-stock");
