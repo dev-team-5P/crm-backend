@@ -55,13 +55,23 @@ router.get(
   async (req, res) => {
     const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    const stockQuery = Stock.find({ pme: req.params.id });
+
+    if (pageSize && currentPage) {
+      stockQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+    }
 
     if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
     if (!user) return res.status(400).send({ message: "Unauthorized" });
-    const stocks = await Stock.find({ pme: req.params.id });
 
-    res.send(stocks);
+    const stocks = await stockQuery;
+    const stockCount = await Stock.countDocuments({ pme: req.params.id });
+
+
+    res.send({ stocks: stocks, count: stockCount });
   }
 );
 
