@@ -111,8 +111,8 @@ router.post('/confirmation', async (req, res) => {
         }
       });
       const mailOptions = {
-        from: admin.email,
-        to: config.mail,
+        from: config.mail,
+        to: admin.email,
         subject: 'New account',
         text: 'Hello,\n\n' + 'There is a new account created by:\n' + 'Pme name: ' + admin.name + '.\n'
           + 'Pme Email: ' + admin.email + '.'
@@ -146,9 +146,31 @@ router.post("/login", async (req, res) => {
       },
       "secret"
     );
-    // Make sure the user has been verified
-    if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
-    // Login successful, write token, and send back user
+  //Creating a Nodemailer Transport instance
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    tls: {
+      rejectUnauthorized: false
+    },
+    port: 465,
+    secure: false,
+    auth: {
+      user: config.mail,
+      pass: config.password
+    },
+  });
+  const mailOptions = {
+    from: config.mail,
+    to: config.mail,
+    subject: 'New Admin account',
+    text: 'Hello,\n\n' + 'A new account was created by admin :'
+      +
+      admin.name + '.\n'
+  };
+  transporter.sendMail(mailOptions, function (err) {
+    if (err) { return res.status(500).send({ msg: err.message }); }
+    res.status(200).send('A verification email has been sent to ' + config.mail + '.');
+  });
     res.send({ token: token, message: "admin" });
   } else if (user) {
     const validPassUser = await bcrypt.compare(
@@ -168,12 +190,8 @@ router.post("/login", async (req, res) => {
       },
       "secret"
     );
-    // Make sure the user has been verified
-    if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
-    // Login successful, write token, and send back user
     res.send({ token: token, message: "user" });
-  } else return res.send({ message: "wrong email or password both" }); // verification validité email //
-});
+    }});
 
 //****************************************** */ get allAdmins api***************************************** //
 router.get(
