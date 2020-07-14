@@ -35,6 +35,7 @@ router.post(
     // const imagePath = url + "/uploads/" + req.file.filename;
     const newStock = req.body;
     newStock.pme = req.params.id;
+    newStock.user = req.user.user._id;
     // newStock.imagePath = imagePath;
     const stock = new Stock(newStock);
     const notif = new NotifMail();
