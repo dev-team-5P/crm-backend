@@ -147,7 +147,7 @@ router.post("/login", async (req, res) => {
       "secret"
     );
     // Make sure the user has been verified
-    if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
+    // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
     // Login successful, write token, and send back user
     res.send({ token: token, message: "admin" });
   } else if (user) {
@@ -169,7 +169,7 @@ router.post("/login", async (req, res) => {
       "secret"
     );
     // Make sure the user has been verified
-    if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
+    // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
     // Login successful, write token, and send back user
     res.send({ token: token, message: "user" });
   } else return res.send({ message: "wrong email or password both" }); // verification validité email //
