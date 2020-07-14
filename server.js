@@ -31,7 +31,7 @@ const app = express();
 // *************************** view engine setup*****************************************/
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({ origin: "*" }));
 // app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/upload", express.static(path.join(__dirname, "upload")));
 

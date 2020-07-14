@@ -5,6 +5,9 @@ const passport = require("passport");
 const Admin = require("../models/adminSchema");
 const User = require("../models/userSchema");
 const resetToken = require("./resetToken");
+const nodemailer = require("nodemailer");
+const Token = require("../models/tokenSchema");
+const config = require("../config/config-mail.json");
 
 const router = express.Router();
 
@@ -21,18 +24,108 @@ router.post("/register", async (req, res) => {
   await admin.save();
 
   res.send(admin);
-});
-// /**
-//  * This function comment is parsed by doctrine
-//  * @route POST /admin/login
-//  * @group Admin - Operations about admin
-//  * @param {string} email.body.required -  email - eg: userdomain
-//  * @param {string} password.body.required - user's password.
-//  * @returns {object} 200 - JWT user Token
-//  * @returns {Error}  default - wrong email or password
-//  */
 
-// api login admin //
+  const token_access = jwt.sign(
+    {
+      data: {
+        _id: admin._id,
+        email: admin.email,
+      },
+    },
+    "secret"
+  );
+  let token = new Token({
+    _adminId: admin.id,
+    token: token_access
+  });
+
+  // Save the verification token
+  token.save(function (err) {
+    if (err) {
+      return res.status(500).send({ msg: err.message });
+    };
+  });
+
+  //Creating a Nodemailer Transport instance
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    tls: {
+      rejectUnauthorized: false
+    },
+    port: 465,
+    secure: false,
+    auth: {
+      user: config.mail,
+      pass: config.password
+    },
+  });
+  const mailOptions = {
+    from: config.mail,
+    to: admin.email,
+    subject: 'Account Verification Token',
+    text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/'
+      +
+      `${config.frontend}`
+      +
+      token.token + '.\n'
+  };
+  transporter.sendMail(mailOptions, function (err) {
+    if (err) { return res.status(500).send({ msg: err.message }); }
+    res.status(200).send('A verification email has been sent to ' + admin.email + '.');
+  });
+});
+//******************************** */ Token Confirmation api******************************* //
+
+router.post('/confirmation', async (req, res) => {
+  const admin = await Admin.findOne({ email: req.body.email });
+  if (!admin) return res.send({ message: "wrong email or password" }); // verification validité email //
+
+  const validPass = await bcrypt.compare(req.body.password, admin.password);
+  if (!validPass) return res.send({ message: "wrong email or password" }); // vrification validité password //
+  // Find a matching token
+  Token.findOne({ token: req.body.token }, function (err, token) {
+    if (!token) return res.status(400).send({ type: 'not-verified', msg: 'We were unable to find a valid token. Your token my have expired.' });
+    // If we found a token, find a matching admin
+    Admin.findOne({ _id: token._adminId, email: req.body.email }, function (err, user) {
+      if (!admin) return res.status(400).send({ msg: 'We were unable to find an admin for this token.' });
+      if (admin.isVerified) return res.status(400).send({ type: 'already-verified', msg: 'This admin has already been verified.' });
+      // Verify and save the admin
+      usadminer.isVerified = true;
+      console.log(admin.isVerified);
+      admin.save(function (err) {
+        if (err) { return res.status(500).send({ msg: err.message }); }
+        res.status(200).send("The account has been verified. Please log in.");
+      });
+      console.log(admin);
+      // send back an email to admin 
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        tls: {
+          rejectUnauthorized: false
+        },
+        port: 465,
+        secure: false,
+        auth: {
+          user: config.mail,
+          pass: config.password
+        }
+      });
+      const mailOptions = {
+        from: admin.email,
+        to: config.mail,
+        subject: 'New account',
+        text: 'Hello,\n\n' + 'There is a new account created by:\n' + 'Pme name: ' + admin.name + '.\n'
+          + 'Pme Email: ' + admin.email + '.'
+      };
+      transporter.sendMail(mailOptions, function (err) {
+        if (err) { return res.status(500).send({ msg: err.message }); }
+        res.status(200).send('A vnotification email has been sent to ' + admin.email + '.');
+      });
+    });
+  });
+});
+//******************************** */  api login admin******************************* //
+
 router.post("/login", async (req, res) => {
   const admin = await Admin.findOne({ email: req.body.email });
   const user = await User.findOne({ email: req.body.email });
@@ -53,7 +146,9 @@ router.post("/login", async (req, res) => {
       },
       "secret"
     );
-
+    // Make sure the user has been verified
+    // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
+    // Login successful, write token, and send back user
     res.send({ token: token, message: "admin" });
   } else if (user) {
     const validPassUser = await bcrypt.compare(
@@ -73,21 +168,14 @@ router.post("/login", async (req, res) => {
       },
       "secret"
     );
-
+    // Make sure the user has been verified
+    // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
+    // Login successful, write token, and send back user
     res.send({ token: token, message: "user" });
   } else return res.send({ message: "wrong email or password both" }); // verification validité email //
 });
 
-// /**
-//  * This function comment is parsed by doctrine
-//  * @route GET /admin
-//  * @group foo - Operations about user
-//  * @returns {object} 200 - An array of user info
-//  * @security JWT
-//  * @headers {string} Authorization - 	date in UTC when token expires
-//  * @returns {Error}  default - Unexpected error
-//  */
-// get allAdmins api //
+//****************************************** */ get allAdmins api***************************************** //
 router.get(
   "/",
   passport.authenticate("bearer", { session: false }),
