@@ -100,7 +100,6 @@ router.post("/login", async (req, res) => {
       },
       "secret"
     );
-
     res.send({ token: token, message: "admin" });
   } else if (user) {
     const validPassUser = await bcrypt.compare(
