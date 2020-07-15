@@ -60,7 +60,7 @@ router.get(
     res.send(Categorie);
   }
 );
-/***************update categorie ***************** */
+/*****************Update categorie By Id ***********/
 router.put(
   "/:id/edit/:idcat",
   passport.authenticate("bearer", { session: false }),
@@ -93,22 +93,6 @@ router.delete(
     res.send({ message: "categorie deleted" });
   }
 );
-/*****************Update categorie By Id ***********/
-router.put("/:id/update/:idcat",
-passport.authenticate("bearer", {session:false}),
-async(req,res)=>{
-  const pme = await Pme.findById(req.params.id);
-  const user = await User.findById(req.user.user);
-  if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
-  if (!user) return res.status(400).send({ message: "Unauthorized" });
-  await categorie.findByIdAndUpdate(req.params.idcat,req.body,(err,resultat)=>{
-    if (err) {
-      res.send(err)
-    } else {
-      res.send(resultat)
-    }
-  })
-})
 
 module.exports = router;
