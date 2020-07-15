@@ -31,7 +31,6 @@ router.post("/:id/register", async (req, res) => {
       message: "email already in use",
     });
 
-
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
   await user.save();
@@ -77,10 +76,12 @@ router.post("/:id/register", async (req, res) => {
     const mailOptions = {
       from: admin.email,
       to: config.mail,
-      subject: 'New User account',
-      text: 'Hello,\n\n' + 'A new account was created by user :'
-        +
-        user.name + '.\n'
+      subject: "New User account",
+      text:
+        "Hello,\n\n" +
+        "A new account was created by user :" +
+        user.name +
+        ".\n",
     };
     transporter.sendMail(mailOptions, function (err) {
       if (err) {
@@ -90,18 +91,19 @@ router.post("/:id/register", async (req, res) => {
         .status(200)
         .send("A verification email has been sent to " + config.mail + ".");
     });
-  }else console.log('email notif is desactivated by super admin');
+  } else console.log("email notif is desactivated by super admin");
 });
-
-// edit user //
-router.put("");
-
 
 //******************************** */ get allUsers api******************************* //
 router.get(
   "/",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
+    const superAdmin = await Admin.findOne({
+      _id: req.user.admin._id,
+      role: "superAdmin",
+    });
+    if (!superAdmin) return res.status(401).send({ message: "Unauthorized" });
     const pageSize = +req.query.pagesize;
     const currentPage = +req.query.page;
     const usersQuery = User.find({}, { password: 0 });
@@ -119,6 +121,8 @@ router.get(
   "/pme/:idPme",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
+    if (!admin) return res.status(401).send({ message: "Unauthorized" });
     const pageSize = +req.query.pagesize;
     const currentPage = +req.query.page;
     const usersQuery = User.find({ pme: req.params.idPme }, { password: 0 });
@@ -159,15 +163,15 @@ router.put(
   }
 );
 // api delete user //
+
 router.delete(
-  "/delete/:id",
+  "delete/:id",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
-    if (admin.role !== "admin")
-      return res.status(401).send({ message: "Unauthorized" });
+    if (!admin) return res.status(401).send({ message: "Unauthorized" });
     await User.findByIdAndDelete(req.params.id);
-    res.send({ message: "user deleted" });
+    res.send({ message: "User Deleted" });
   }
 );
 

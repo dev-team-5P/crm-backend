@@ -18,7 +18,6 @@ const pmeSchema = new mongoose.Schema(
     //     ref: "Fournisseur",
     //   },
     // ],
-    domain: String,
     admin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
