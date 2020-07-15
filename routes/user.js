@@ -3,9 +3,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const User = require("../models/userSchema");
-
+const Admin = require("../models/adminSchema");
 const Token = require("../models/tokenSchema");
 const config = require("../config/config-mail.json");
+const Setting = require("../models/globalsettingSchema");
 
 const Pme = require("../models/pmeSchema");
 
@@ -58,119 +59,39 @@ router.post("/:id/register", async (req, res) => {
       return res.status(500).send({ msg: err.message });
     }
   });
-
-  //Creating a Nodemailer Transport instance
-  const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    tls: {
-      rejectUnauthorized: false,
-    },
-    port: 465,
-    secure: false,
-    auth: {
-      user: config.mail,
-      pass: config.password,
-    },
-  });
-  const mailOptions = {
-    from: config.mail,
-    to: user.email,
-    subject: "Account Verification Token",
-    text:
-      "Hello,\n\n" +
-      "Please verify your account by clicking the link: \nhttp://" +
-      `${config.frontend}` +
-      token.token +
-      ".\n",
-  };
-  transporter.sendMail(mailOptions, function (err) {
-    if (err) {
-      return res.status(500).send({ msg: err.message });
-    }
-    res
-      .status(200)
-      .send("A verification email has been sent to " + user.email + ".");
-  });
-});
-//******************************** */ Token Confirmation api******************************* //
-
-router.post("/confirmation", async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.send({ message: "wrong email or password" }); // verification validité email //
-
-  const validPass = await bcrypt.compare(req.body.password, user.password);
-  if (!validPass) return res.send({ message: "wrong email or password" }); // vrification validité password //
-  // Find a matching token
-  Token.findOne({ token: req.body.token }, function (err, token) {
-    if (!token)
-      return res.status(400).send({
-        type: "not-verified",
-        msg:
-          "We were unable to find a valid token. Your token my have expired.",
-      });
-    // If we found a token, find a matching user
-    User.findOne({ _id: token._userId, email: req.body.email }, function (
-      err,
-      user
-    ) {
-      if (!user)
-        return res
-          .status(400)
-          .send({ msg: "We were unable to find a user for this token." });
-      if (user.isVerified)
-        return res.status(400).send({
-          type: "already-verified",
-          msg: "This user has already been verified.",
-        });
-      // Verify and save the user
-      user.isVerified = true;
-      console.log(user.isVerified);
-      user.save(function (err) {
-        if (err) {
-          return res.status(500).send({ msg: err.message });
-        }
-        res.status(200).send("The account has been verified. Please log in.");
-      });
-      console.log(user);
-      // send back an email to admin
-      const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        tls: {
-          rejectUnauthorized: false,
-        },
-        port: 465,
-        secure: false,
-        auth: {
-          user: config.mail,
-          pass: config.password,
-        },
-      });
-      const mailOptions = {
-        from: user.email,
-        to: config.mail,
-        subject: "New account",
-        text:
-          "Hello,\n\n" +
-          "There is a new account created by:\n" +
-          "Pme name: " +
-          user.name +
-          ".\n" +
-          "Pme Email: " +
-          user.email +
-          ".",
-      };
-      transporter.sendMail(mailOptions, function (err) {
-        if (err) {
-          return res.status(500).send({ msg: err.message });
-        }
-        res
-          .status(200)
-          .send("A vnotification email has been sent to " + user.email + ".");
-      });
+  let setting = await Setting.findOne();
+  if (setting.isActivSuperAdmin === true) {
+    //Creating a Nodemailer Transport instance
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      tls: {
+        rejectUnauthorized: false,
+      },
+      port: 465,
+      secure: false,
+      auth: {
+        user: config.mail,
+        pass: config.password,
+      },
     });
-  });
+    const mailOptions = {
+      from: admin.email,
+      to: config.mail,
+      subject: 'New User account',
+      text: 'Hello,\n\n' + 'A new account was created by user :'
+        +
+        user.name + '.\n'
+    };
+    transporter.sendMail(mailOptions, function (err) {
+      if (err) {
+        return res.status(500).send({ msg: err.message });
+      }
+      res
+        .status(200)
+        .send("A verification email has been sent to " + config.mail + ".");
+    });
+  }else console.log('email notif is desactivated by super admin');
 });
-
 
 // edit user //
 router.put("");
@@ -235,6 +156,20 @@ router.put(
         res.send(resultat);
       }
     });
+  }
+);
+// api delete user //
+router.delete(
+  "/delete/:id",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
+
+    if (admin.role !== "admin")
+      return res.status(401).send({ message: "Unauthorized" });
+
+    await User.findByIdAndDelete(req.params.id);
+    res.send({ message: "user deleted" });
   }
 );
 
