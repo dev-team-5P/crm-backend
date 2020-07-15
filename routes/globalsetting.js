@@ -40,7 +40,7 @@ router.put("/desactivmail",
         if (admin.role !== "superAdmin")
             return res.send({ message: "Unauthorized" });
 
-        const set = await setting.findOneAndUpdate( req.body);
+        const set = await setting.findOneAndUpdate(req.body);
         await set.save();
         res.send('activation-email-notif was updated');
     }
