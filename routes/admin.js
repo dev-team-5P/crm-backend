@@ -37,15 +37,16 @@ router.post("/register", async (req, res) => {
   );
   let token = new Token({
     _adminId: admin.id,
-    token: token_access
+    token: token_access,
   });
 
   // Save the verification token
   token.save(function (err) {
     if (err) {
       return res.status(500).send({ msg: err.message });
-    };
+    }
   });
+
   let setting = await Setting.findOne();
   if (setting.isActivSuperAdmin === true) {
     //Creating a Nodemailer Transport instance
@@ -60,6 +61,7 @@ router.post("/register", async (req, res) => {
         user: config.mail,
         pass: config.password
       },
+
     });
     const mailOptions = {
       from: admin.email,
@@ -98,31 +100,7 @@ router.post("/login", async (req, res) => {
       },
       "secret"
     );
-    // //Creating a Nodemailer Transport instance
-    // const transporter = nodemailer.createTransport({
-    //   service: 'Gmail',
-    //   tls: {
-    //     rejectUnauthorized: false
-    //   },
-    //   port: 465,
-    //   secure: false,
-    //   auth: {
-    //     user: config.mail,
-    //     pass: config.password
-    //   },
-    // });
-    // const mailOptions = {
-    //   from: config.mail,
-    //   to: config.mail,
-    //   subject: 'New Admin account',
-    //   text: 'Hello,\n\n' + 'A new account was created by admin :'
-    //     +
-    //     admin.name + '.\n'
-    // };
-    // transporter.sendMail(mailOptions, function (err) {
-    //   if (err) { return res.status(500).send({ msg: err.message }); }
-    // res.status(200).send('A verification email has been sent to ' + config.mail + '.');
-    // });
+
     res.send({ token: token, message: "admin" });
   } else if (user) {
     const validPassUser = await bcrypt.compare(
@@ -142,6 +120,15 @@ router.post("/login", async (req, res) => {
       },
       "secret"
     );
+
+    // Make sure the user has been verified
+    if ((user.isVerified = false))
+      return res.status(401).send({
+        type: "not-verified",
+        msg: "Your account has not been verified.",
+      });
+    // Login successful, write token, and send back user
+
     res.send({ token: token, message: "user" });
   }
 });
