@@ -10,10 +10,12 @@ router.get(
   "/",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const admin = await Admin.findById(req.user.admin._id);
+    const superAdmin = await Admin.findOne({
+      _id: req.user.admin._id,
+      role: "superAdmin",
+    });
 
-    if (admin.role !== "superAdmin")
-      return res.send({ message: "Unauthorized" });
+    if (!superAdmin) return res.send({ message: "Unauthorized" });
 
     const pageSize = +req.query.pagesize;
     const currentPage = +req.query.page;
@@ -71,6 +73,7 @@ router.post(
     if (!admin) return res.send({ message: "Unauthorized" });
 
     const pme = new Pme(req.body);
+    if (!req.body) return res.status(400).send({ message: " false entry" });
 
     await pme.save();
     await Pme.findByIdAndUpdate(pme._id, { admin: admin._id });

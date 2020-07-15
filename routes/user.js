@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const User = require("../models/userSchema");
+const Admin = require("../models/adminSchema");
 
 const Token = require("../models/tokenSchema");
 const config = require("../config/config-mail.json");
@@ -29,7 +30,6 @@ router.post("/:id/register", async (req, res) => {
     return res.status(400).send({
       message: "email already in use",
     });
-
 
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
@@ -171,16 +171,16 @@ router.post("/confirmation", async (req, res) => {
   });
 });
 
-
-// edit user //
-router.put("");
-
-
 //******************************** */ get allUsers api******************************* //
 router.get(
   "/",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
+    const superAdmin = await Admin.findOne({
+      _id: req.user.admin._id,
+      role: "superAdmin",
+    });
+    if (!superAdmin) return res.status(401).send({ message: "Unauthorized" });
     const pageSize = +req.query.pagesize;
     const currentPage = +req.query.page;
     const usersQuery = User.find({}, { password: 0 });
@@ -198,6 +198,8 @@ router.get(
   "/pme/:idPme",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
+    if (!admin) return res.status(401).send({ message: "Unauthorized" });
     const pageSize = +req.query.pagesize;
     const currentPage = +req.query.page;
     const usersQuery = User.find({ pme: req.params.idPme }, { password: 0 });
@@ -235,6 +237,17 @@ router.put(
         res.send(resultat);
       }
     });
+  }
+);
+
+router.delete(
+  "delete/:id",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
+    if (!admin) return res.status(401).send({ message: "Unauthorized" });
+    await User.findByIdAndDelete(req.params.id);
+    res.send({ message: "User Deleted" });
   }
 );
 
