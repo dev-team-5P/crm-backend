@@ -122,11 +122,7 @@ router.post("/login", async (req, res) => {
     );
 
     // Make sure the user has been verified
-    if ((user.isVerified = false))
-      return res.status(401).send({
-        type: "not-verified",
-        msg: "Your account has not been verified.",
-      });
+    // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
     // Login successful, write token, and send back user
 
     res.send({ token: token, message: "user" });
