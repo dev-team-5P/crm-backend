@@ -45,7 +45,6 @@ router.post("/register", async (req, res) => {
       return res.status(500).send({ msg: err.message });
     };
   });
-
   //Creating a Nodemailer Transport instance
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -61,17 +60,15 @@ router.post("/register", async (req, res) => {
   });
   const mailOptions = {
     from: config.mail,
-    to: admin.email,
-    subject: 'Account Verification Token',
-    text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/'
+    to: config.mail,
+    subject: 'n ew Account ',
+    text: 'Hello,\n\n' + 'There is a new account :'
       +
-      `${config.frontend}`
-      +
-      token.token + '.\n'
+      admin.name + '.\n'
   };
   transporter.sendMail(mailOptions, function (err) {
     if (err) { return res.status(500).send({ msg: err.message }); }
-    res.status(200).send('A verification email has been sent to ' + admin.email + '.');
+    res.status(200).send('An email has been sent to ' + config.mail + '.');
   });
 });
 //******************************** */ Token Confirmation api******************************* //
@@ -111,8 +108,8 @@ router.post('/confirmation', async (req, res) => {
         }
       });
       const mailOptions = {
-        from: admin.email,
-        to: config.mail,
+        from: config.mail,
+        to: admin.email,
         subject: 'New account',
         text: 'Hello,\n\n' + 'There is a new account created by:\n' + 'Pme name: ' + admin.name + '.\n'
           + 'Pme Email: ' + admin.email + '.'
@@ -172,8 +169,7 @@ router.post("/login", async (req, res) => {
     // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
     // Login successful, write token, and send back user
     res.send({ token: token, message: "user" });
-  } else return res.send({ message: "wrong email or password both" }); // verification validité email //
-});
+    }});
 
 //****************************************** */ get allAdmins api***************************************** //
 router.get(
