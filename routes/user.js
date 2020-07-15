@@ -164,10 +164,8 @@ router.delete(
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
-
     if (admin.role !== "admin")
       return res.status(401).send({ message: "Unauthorized" });
-
     await User.findByIdAndDelete(req.params.id);
     res.send({ message: "user deleted" });
   }
