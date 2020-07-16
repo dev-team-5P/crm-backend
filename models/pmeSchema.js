@@ -11,7 +11,7 @@ const pmeSchema = new mongoose.Schema(
     adress: String,
     tax: { type: Number, default: 18 },
     siege: String,
-    activity: String,
+    activity: { type: String, required: true },
     // fournisseur: [
     //   {
     //     type: mongoose.Schema.Types.ObjectId,
