@@ -149,10 +149,5 @@ router.delete(
   }
 );
 
-// router.post(
-//   "/:id/notif-rupture/:prodId",
-//   passport.authenticate("bearer", { session: false }),
-//   notifRupture.notifyRupture
-// );
 
 module.exports = router;
