@@ -7,44 +7,42 @@ const router = express.Router();
 
 /* READ ME ==+++++W>>>>>>> cette partie est à utiliser une seule fois pour initialiser la base de donnée */
 router.post(
-    "/activemail/",
-    // passport.authenticate("bearer", { session: false }),
-    async (req, res) => {
-            const set = new setting(req.body);
-            await set.save();
-            res.send(set);
-    }
+  "/activemail/",
+  // passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const set = new setting(req.body);
+    await set.save();
+    res.send(set);
+  }
 );
 /*******************activate notif mail ************ */
 router.get(
-    "/activemail",
-    passport.authenticate("bearer", { session: false }),
-    async (req, res) => {
-        const admin = await Admin.findById(req.user.admin._id);
+  "/activemail",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
 
-        if (admin.role !== "superAdmin")
-            return res.send({ message: "Unauthorized" });
+    if (admin.role !== "superAdmin")
+      return res.send({ message: "Unauthorized" });
 
-        const set = await setting.findOne();
-        res.send(set);
-    }
+    const set = await setting.findOne();
+    res.send(set);
+  }
 );
-
 
 /*******************desactivate notif mail ************ */
-router.put("/desactivmail",
-    passport.authenticate("bearer", { session: false }),
-    async (req, res) => {
-        const admin = await Admin.findById(req.user.admin._id);
+router.put(
+  "/desactivmail",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    const admin = await Admin.findById(req.user.admin._id);
 
-        if (admin.role !== "superAdmin")
-            return res.send({ message: "Unauthorized" });
+    if (admin.role !== "superAdmin")
+      return res.send({ message: "Unauthorized" });
 
-        const set = await setting.findOneAndUpdate(req.body);
-        await set.save();
-        res.send('activation-email-notif was updated');
-    }
+    await setting.findOneAndUpdate(req.body);
+    res.send("activation-email-notif was updated");
+  }
 );
-
 
 module.exports = router;
