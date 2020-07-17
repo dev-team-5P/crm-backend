@@ -4,6 +4,7 @@ const passport = require("passport");
 const Stock = require("../models/stockSchema");
 const Pme = require("../models/pmeSchema");
 const User = require("../models/userSchema");
+const Admin = require("../models/adminSchema");
 // const notifRupture = require("./mail-notif-rupture-stock");
 const NotifMail = require("../models/notifSchema");
 
@@ -55,24 +56,27 @@ router.get(
   async (req, res) => {
     const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
+    const admin = await Admin.findOne({
+      _id: req.user.admin,
+      pme: req.params.id,
+    });
     const pageSize = +req.query.pagesize;
     const currentPage = +req.query.page;
     const stockQuery = Stock.find({ pme: req.params.id });
 
-    if (pageSize && currentPage) {
-      stockQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
-    }
+    if (user || admin) {
+      if (pageSize && currentPage) {
+        stockQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+      }
+      if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+      // const stocks = await Stock.find({pme :req.params.id});
 
-    if (!user) return res.status(400).send({ message: "Unauthorized" });
-    // const stocks = await Stock.find({pme :req.params.id});
+      const stocks = await stockQuery;
+      const stockCount = await Stock.countDocuments({ pme: req.params.id });
 
-    const stocks = await stockQuery;
-    const stockCount = await Stock.countDocuments({ pme: req.params.id });
-
-
-    res.send({ stocks: stocks, count: stockCount });
+      res.send({ stocks: stocks, count: stockCount });
+    } else return res.status(400).send({ message: "Unauthorized" });
   }
 );
 
