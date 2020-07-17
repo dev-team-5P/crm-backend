@@ -32,6 +32,7 @@ router.post("/:id/register", async (req, res) => {
     });
 
   const salt = await bcrypt.genSalt(10);
+  const pass = user.password;
   user.password = await bcrypt.hash(user.password, salt);
   await user.save();
 
@@ -59,7 +60,7 @@ router.post("/:id/register", async (req, res) => {
     }
   });
   let setting = await Setting.findOne();
-  if (setting.isActivSuperAdmin === true) {
+  // if (setting.isActivSuperAdmin === true) {
     //Creating a Nodemailer Transport instance
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -74,13 +75,13 @@ router.post("/:id/register", async (req, res) => {
       },
     });
     const mailOptions = {
-      from: admin.email,
-      to: config.mail,
+      from: config.mail,
+      to: user.email,
       subject: "New User account",
       text:
         "Hello,\n\n" +
-        "A new account was created by user :" +
-        user.name +
+        "A new account was created by admin :" +"\n\n"+
+        "Name :" + user.name +"\n\n"+ "Email :"+ user.email +"\n\n"+"Password :"+ pass +
         ".\n",
     };
     transporter.sendMail(mailOptions, function (err) {
@@ -89,9 +90,9 @@ router.post("/:id/register", async (req, res) => {
       }
       res
         .status(200)
-        .send("A verification email has been sent to " + config.mail + ".");
+        .send("A verification email has been sent to " + user.email + ".");
     });
-  } else console.log("email notif is desactivated by super admin");
+  // } else console.log("email notif is desactivated by super admin");
 });
 
 //******************************** */ get allUsers api******************************* //
