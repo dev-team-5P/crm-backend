@@ -1,6 +1,7 @@
 const express = require("express");
 const Fourni = require("./../models/fourniSchema");
 const User = require("../models/userSchema");
+const Admin = require("../models/adminSchema");
 const router = express.Router();
 const passport = require("passport");
 
@@ -17,21 +18,34 @@ router.post("/:id/fourni", async (req, res) => {
 });
 
 router.get(
-  "/list-fourn/",
+  "/list-fourn/:idPme",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const user = await User.findById(req.user.user._id);
-    const pageSize = +req.query.pagesize;
-    const currentPage = +req.query.page;
-    const fournisQuery = Fourni.find({ pme: user.pme });
+    const user = await User.findOne({
+      _id: req.user.user,
+      pme: req.params.idPme,
+    });
+    const admin = await Admin.findOne({ _id: req.user.admin });
 
-    if (pageSize && currentPage) {
-      fournisQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
-    }
-    const fournis = await fournisQuery;
-    const fournisCount = await Fourni.countDocuments({ pme: user.pme });
+    const pme = admin
+      ? admin.pme.find((p) => p == req.params.idPme)
+      : undefined;
 
-    res.send({ fournis: fournis, count: fournisCount });
+    if (user || pme) {
+      const pageSize = +req.query.pagesize;
+      const currentPage = +req.query.page;
+      const fournisQuery = Fourni.find({ pme: req.params.idPme });
+
+      if (pageSize && currentPage) {
+        fournisQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
+      }
+      const fournis = await fournisQuery;
+      const fournisCount = await Fourni.countDocuments({
+        pme: req.params.idPme,
+      });
+
+      res.send({ fournis: fournis, count: fournisCount });
+    } else return res.status(401).send({ message: "Unauthorized" });
   }
 );
 
