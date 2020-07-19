@@ -21,17 +21,14 @@ router.get(
   "/list-fourn/:idPme",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const user = await User.findOne({
-      _id: req.user.user,
-      pme: req.params.idPme,
-    });
+    const user = await User.findOne({ _id: req.user.user });
     const admin = await Admin.findOne({ _id: req.user.admin });
 
-    const pme = admin
+    const pmeAdmin = admin
       ? admin.pme.find((p) => p == req.params.idPme)
       : undefined;
-
-    if (user || pme) {
+    const pmeUser = user ? user.pme == req.params.idPme : undefined;
+    if (pmeUser || pmeAdmin) {
       const pageSize = +req.query.pagesize;
       const currentPage = +req.query.page;
       const fournisQuery = Fourni.find({ pme: req.params.idPme });
@@ -45,20 +42,26 @@ router.get(
       });
 
       res.send({ fournis: fournis, count: fournisCount });
-    } else return res.status(401).send({ message: "Unauthorized" });
+    }
   }
 );
 
 router.get(
-  "/list-fourn/:idFourn",
+  "/detail-fourn/:idFourn",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const user = await User.findById(req.user.user._id);
-    const fourni = await Fourni.findOne({
-      pme: user.pme,
-      _id: req.params.idFourn,
-    });
-    res.send(fourni);
+    const user = await User.findOne({ _id: req.user.user });
+    const admin = await Admin.findOne({ _id: req.user.admin });
+
+    const fourni = await Fourni.findOne({ _id: req.params.idFourn });
+    const pmeAdmin = admin
+      ? admin.pme.find((p) => p.toString() == fourni.pme.toString())
+      : undefined;
+    const pmeUser = user
+      ? user.pme.toString() == fourni.pme.toString()
+      : undefined;
+    if (pmeAdmin || pmeUser) return res.send(fourni);
+    else return res.send({ message: "Unauthorized" });
   }
 );
 router.put("/editfourni/:id", function (req, res) {

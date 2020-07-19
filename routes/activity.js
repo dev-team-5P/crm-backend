@@ -5,7 +5,9 @@ const Admin = require("../models/adminSchema");
 passport = require("passport");
 
 //create new activity
-router.post("/add",
+
+router.post(
+  "/add",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
@@ -18,28 +20,31 @@ router.post("/add",
   }
 );
 // create findAll
-router.get("/get",
+
+router.get(
+  "/get",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
 
-    if (admin.role === "superAdmin" || admin.role === 'admin') {
-      const pageSize = +req.query.pagesize;
-      const currentPage = +req.query.page;
-      const activityQuery = Activity.find();
+    if (!admin) return res.send({ message: "Unauthorized" });
 
-      if (pageSize && currentPage) {
-        activityQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
-      }
-      const activity = await activityQuery;
-      const activityCount = await Activity.countDocuments();
-      res.send({ activity: activity, count: activityCount });
+    const pageSize = +req.query.pagesize;
+    const currentPage = +req.query.page;
+    const activityQuery = Activity.find();
+
+    if (pageSize && currentPage) {
+      activityQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
     }
-    else
-      {return res.send({ message: "Unauthorized" });}
-  });
+    const activity = await activityQuery;
+    const activityCount = await Activity.countDocuments();
+    res.send({ activity: activity, count: activityCount });
+  }
+);
 
-// create delete by id api 
+
+
+// create delete by id api
 router.delete(
   "/delete/:id",
   passport.authenticate("bearer", { session: false }),
@@ -53,14 +58,16 @@ router.delete(
     res.send({ message: "activity was deleted successfully" });
   }
 );
-// create update by id api 
+// create update by id api
 router.put(
   "/edit/:id",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
 
-    if (!admin) return res.send({ message: "Unauthorized" }); // only admin and superAdmin can modify 
+
+    if (!admin) return res.send({ message: "Unauthorized" }); // only admin and superAdmin can modify
+
 
     if (admin.role === "superAdmin") {
       await Activity.findByIdAndUpdate(req.params.id, req.body);
