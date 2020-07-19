@@ -51,51 +51,47 @@ router.post(
 
 // get pme Stock //
 router.get(
-  "/:id",
+  "/:idPme",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
-    const admin = await Admin.findOne({
-      _id: req.user.admin,
-      pme: req.params.id,
-    });
+    const admin = await Admin.findOne({ _id: req.user.admin });
     const pageSize = +req.query.pagesize;
     const currentPage = +req.query.page;
-    const stockQuery = Stock.find({ pme: req.params.id });
+    const stockQuery = Stock.find({ pme: req.params.idPme });
 
-    if (user || admin) {
+    const pmeAdmin = admin
+      ? admin.pme.find((p) => p == req.params.idPme)
+      : undefined;
+    const pmeUser = user ? user.pme == req.params.idPme : undefined;
+    if (pmeUser || pmeAdmin) {
       if (pageSize && currentPage) {
         stockQuery.skip(pageSize * (currentPage - 1)).limit(pageSize);
       }
-      if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
       // const stocks = await Stock.find({pme :req.params.id});
 
       const stocks = await stockQuery;
-      const stockCount = await Stock.countDocuments({ pme: req.params.id });
+      const stockCount = await Stock.countDocuments({ pme: req.params.idPme });
 
       res.send({ stocks: stocks, count: stockCount });
-    } else return res.status(400).send({ message: "Unauthorized" });
+    }
   }
 );
 
 // get product by id //
 router.get(
-  "/:id/:prodId",
-
+  "/detail/:prodId",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
+    const admin = await Admin.findById(req.user.admin);
 
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+    if (user || admin) {
+      const product = await Stock.findById(req.params.prodId);
 
-    if (!user) return res.status(400).send({ message: "Unauthorized" });
-
-    const product = await Stock.findById(req.params.prodId);
-
-    res.send(product);
+      res.send(product);
+    } else return res.status(400).send({ message: "Unauthorized" });
   }
 );
 
@@ -148,6 +144,5 @@ router.delete(
     res.send({ message: "product deleted" });
   }
 );
-
 
 module.exports = router;

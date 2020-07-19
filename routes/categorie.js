@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const Pme = require("../models/pmeSchema");
 const User = require("../models/userSchema");
-const Admin = require ("../models/adminSchema");
+const Admin = require("../models/adminSchema");
 const categorie = require("../models/categorieSchema");
 
 const router = express.Router();
@@ -35,13 +35,14 @@ router.get(
   async (req, res) => {
     const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
+    const admin = await Admin.findById(req.user.admin);
     if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
-    if (!user) return res.status(400).send({ message: "Unauthorized" });
+    if (user || admin) {
+      const Categorie = await categorie.find({ pme: req.params.id });
 
-    const Categorie = await categorie.find({pme: req.params.id})
-
-    res.send(Categorie);
+      res.send(Categorie);
+    } else return res.status(400).send({ message: "Unauthorized" });
   }
 );
 /*************get categorie by id ************ */
@@ -72,11 +73,14 @@ router.put(
     if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
     if (user || admin) {
-
-      const Categorie = await categorie.findByIdAndUpdate(req.params.idcat, req.body);
+      const Categorie = await categorie.findByIdAndUpdate(
+        req.params.idcat,
+        req.body
+      );
       res.send(Categorie);
     } else return res.status(400).send({ message: "Unauthorized" });
-  });
+  }
+);
 /***************delete categorie ***************** */
 router.delete(
   "/:id/delete/:idcat",
@@ -93,6 +97,5 @@ router.delete(
     res.send({ message: "categorie deleted" });
   }
 );
-
 
 module.exports = router;
