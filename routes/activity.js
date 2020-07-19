@@ -5,6 +5,7 @@ const Admin = require("../models/adminSchema");
 passport = require("passport");
 
 //create new activity
+
 router.post(
   "/add",
   passport.authenticate("bearer", { session: false }),
@@ -19,6 +20,7 @@ router.post(
   }
 );
 // create findAll
+
 router.get(
   "/get",
   passport.authenticate("bearer", { session: false }),
@@ -39,6 +41,8 @@ router.get(
     res.send({ activity: activity, count: activityCount });
   }
 );
+
+
 
 // create delete by id api
 router.delete(
@@ -61,7 +65,9 @@ router.put(
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
 
+
     if (!admin) return res.send({ message: "Unauthorized" }); // only admin and superAdmin can modify
+
 
     if (admin.role === "superAdmin") {
       await Activity.findByIdAndUpdate(req.params.id, req.body);
