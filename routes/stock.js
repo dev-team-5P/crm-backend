@@ -131,17 +131,19 @@ router.delete(
   "/:id/delete/:prodId",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
+    // const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
+    const admin = await Admin.findById(req.user.admin);
 
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+    adminPme = admin ? admin.pme.find((p) => p == req.params.id) : undefined;
+    userPme = user ? user.pme == req.params.id : undefined;
 
-    if (!user) return res.status(400).send({ message: "Unauthorized" });
+    if (userPme || adminPme) {
+      const product = await Stock.findByIdAndDelete(req.params.prodId);
+      await NotifMail.findOneAndDelete({ produit: product._id });
 
-    const product = await Stock.findByIdAndDelete(req.params.prodId);
-    await NotifMail.findOneAndDelete({ produit: product._id });
-
-    res.send({ message: "product deleted" });
+      res.send({ message: "product deleted" });
+    }
   }
 );
 
