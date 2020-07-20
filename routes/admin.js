@@ -51,31 +51,36 @@ router.post("/register", async (req, res) => {
   if (setting.isActivSuperAdmin === true) {
     //Creating a Nodemailer Transport instance
     const transporter = nodemailer.createTransport({
-      service: 'Gmail',
+      service: "Gmail",
       tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
       },
       port: 465,
       secure: false,
       auth: {
         user: config.mail,
-        pass: config.password
+        pass: config.password,
       },
-
     });
     const mailOptions = {
       from: admin.email,
       to: config.mail,
-      subject: 'New Admin account',
-      text: 'Hello,\n\n' + 'A new account was created by admin :'
-        +
-        admin.name + '.\n'
+      subject: "New Admin account",
+      text:
+        "Hello,\n\n" +
+        "A new account was created by admin :" +
+        admin.name +
+        ".\n",
     };
     transporter.sendMail(mailOptions, function (err) {
-      if (err) { return res.status(500).send({ msg: err.message }); }
-      res.status(200).send('A verification email has been sent to ' + config.mail + '.');
+      if (err) {
+        return res.status(500).send({ msg: err.message });
+      }
+      res
+        .status(200)
+        .send("A verification email has been sent to " + config.mail + ".");
     });
-  } else console.log('email notif is desactivated by super admin');
+  } else console.log("email notif is desactivated by super admin");
 });
 
 //******************************** */  api login admin******************************* //
@@ -83,49 +88,58 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   const admin = await Admin.findOne({ email: req.body.email });
   const user = await User.findOne({ email: req.body.email });
-  if (admin) {
-    const validPassAdmin = await bcrypt.compare(
-      req.body.password,
-      admin.password
-    );
-    if (!validPassAdmin)
-      return res.send({ message: "wrong email or password 'admin'" }); // vrification validité password //
-    let token = jwt.sign(
-      {
-        data: {
-          _id: admin._id,
-          email: admin.email,
-          role: admin.role,
-        },
-      },
-      "secret"
-    );
-    res.send({ token: token, message: "admin" });
-  } else if (user) {
-    const validPassUser = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
-    if (!validPassUser)
-      return res.send({ message: "wrong email or password 'user'" }); // vrification validité password //
-    let token = jwt.sign(
-      {
-        data: {
-          _id: user._id,
-          email: user.email,
-          role: user.role,
-          pme: user.pme,
-        },
-      },
-      "secret"
-    );
 
-    // Make sure the user has been verified
-    // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
-    // Login successful, write token, and send back user
+  const validEmailAdmin = admin ? admin.email : undefined;
 
-    res.send({ token: token, message: "user" });
-  }
+  const validEmailUser = user ? user.email : undefined;
+
+  if (validEmailUser || validEmailAdmin) {
+    if (admin) {
+      const validPassAdmin = await bcrypt.compare(
+        req.body.password,
+        admin.password
+      );
+
+      if (!validPassAdmin)
+        return res.status(401).send({ message: "wrong email or password" }); // verification validité password //
+      let token = jwt.sign(
+        {
+          data: {
+            _id: admin._id,
+            email: admin.email,
+            role: admin.role,
+          },
+        },
+        "secret"
+      );
+      res.send({ message: token });
+    } else if (user) {
+      const validPassUser = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+
+      if (!validPassUser)
+        return res.status(401).send({ message: "wrong email or password" }); // verification validité password //
+      let token = jwt.sign(
+        {
+          data: {
+            _id: user._id,
+            email: user.email,
+            role: user.role,
+            pme: user.pme,
+          },
+        },
+        "secret"
+      );
+
+      // Make sure the user has been verified
+      // if (user.isVerified = false) return res.status(401).send({ type: 'not-verified', msg: 'Your account has not been verified.' });
+      // Login successful, write token, and send back user
+
+      res.send({ message: token });
+    }
+  } else return res.status(401).send({ message: "wrong email or password" });
 });
 
 //****************************************** */ get allAdmins api***************************************** //
