@@ -49,7 +49,7 @@ router.get(
       }
       const categ = await gategoriekQuery;
       const catgkCount = await categorie.countDocuments({
-        pme: req.params.idPme,
+        pme: req.params.id,
       });
 
       res.send({ categ: categ, count: catgkCount });
