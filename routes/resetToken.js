@@ -15,7 +15,6 @@ module.exports = {
       return res.status(500).json({ message: "Email is required" });
     }
     const userGet = await getCollection(req);
-    // console.log(userGet);
     const user = await userGet.findOne({
       email: req.body.email,
     });
@@ -28,7 +27,6 @@ module.exports = {
       code: Math.floor(Math.random() * 10000),
     });
     const userUpd = await updateCollection(req, resetToken);
-    console.log(userUpd);
     resetToken.save(function (err) {
       if (err) {
         return res.status(500).send({ msg: err.message });
@@ -81,7 +79,6 @@ module.exports = {
       return res.status(409).json({ message: "Invalid Code" });
     }
     const userIdGet = await getCollectinById(userToken);
-    console.log(userIdGet);
     userIdGet
       .findOne({ resetToken: userToken._id })
       .then(() => {

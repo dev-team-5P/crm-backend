@@ -42,8 +42,6 @@ router.get(
   }
 );
 
-
-
 // create delete by id api
 router.delete(
   "/delete/:id",
@@ -65,9 +63,7 @@ router.put(
   async (req, res) => {
     const admin = await Admin.findById(req.user.admin._id);
 
-
     if (!admin) return res.send({ message: "Unauthorized" }); // only admin and superAdmin can modify
-
 
     if (admin.role === "superAdmin") {
       await Activity.findByIdAndUpdate(req.params.id, req.body);
@@ -92,13 +88,15 @@ router.put(
 //     });
 
 // // create findOne
-// router.get("/get/:id", function (req, res) {
-//     const id = req.params.id;
-//     Activity.findById(id, (err, resultat) => {
-//         if (err) res.send({
-//             message: "Could not find activity with id=" + id
-//         });
-//         res.send(resultat);
-//     })
-// });
+router.get("/get/:id", function (req, res) {
+  const id = req.params.id;
+  Activity.findById(id, (err, resultat) => {
+    if (err)
+      res.send({
+        message: "Could not find activity with id=" + id,
+      });
+    res.send(resultat);
+  });
+});
+
 module.exports = router;
