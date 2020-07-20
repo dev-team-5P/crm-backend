@@ -12,20 +12,19 @@ router.post(
   "/add/:id",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
 
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+    userPme = user ? user.pme == req.params.id : undefined;
+    if (userPme) {
+      const newcategorie = req.body;
+      newcategorie.pme = req.params.id;
 
-    if (!user) return res.status(400).send({ message: "Unauthorized" });
-    const newcategorie = req.body;
-    newcategorie.pme = req.params.id;
+      const Categorie = new categorie(newcategorie);
 
-    const Categorie = new categorie(newcategorie);
+      await Categorie.save();
 
-    await Categorie.save();
-
-    res.send(Categorie);
+      res.send(Categorie);
+    } else return res.status(400).send({ message: "Unauthorized" });
   }
 );
 /***********get All Categories ************* */
@@ -33,52 +32,61 @@ router.get(
   "/get/:id",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
     const admin = await Admin.findById(req.user.admin);
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
 
-    if (user || admin) {
+    adminPme = admin ? admin.pme.find((p) => p == req.params.id) : undefined;
+    userPme = user ? user.pme == req.params.id : undefined;
+
+    if (adminPme || userPme) {
       const Categorie = await categorie.find({ pme: req.params.id });
 
       res.send(Categorie);
-    } else return res.status(400).send({ message: "Unauthorized" });
+    }
   }
 );
 /*************get categorie by id ************ */
 router.get(
-  "/:id/get/:idcat",
+  "/getOne/:idcat",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
+    const admin = await Admin.findById(req.user.admin);
     const user = await User.findById(req.user.user);
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+    const category = await categorie.findById(req.params.idcat);
 
-    if (!user) return res.status(400).send({ message: "Unauthorized" });
+    adminPme = admin
+      ? admin.pme.find((p) => p.toString() == category.pme.toString())
+      : undefined;
+    userPme = user ? user.pme.toString() == category.pme.toString() : undefined;
 
-    const Categorie = await categorie.findById(req.params.idcat);
+    if (adminPme || userPme) {
+      const Categorie = await categorie.findById(req.params.idcat);
 
-    res.send(Categorie);
+      res.send(Categorie);
+    }
   }
 );
 /*****************Update categorie By Id ***********/
 router.put(
-  "/:id/edit/:idcat",
+  "/edit/:idcat",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
     const admin = await Admin.findById(req.user.admin);
+    const category = await categorie.findById(req.params.idcat);
 
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+    adminPme = admin
+      ? admin.pme.find((p) => p.toString() == category.pme.toString())
+      : undefined;
+    userPme = user ? user.pme.toString() == category.pme.toString() : undefined;
 
-    if (user || admin) {
+    if (adminPme || userPme) {
       const Categorie = await categorie.findByIdAndUpdate(
         req.params.idcat,
         req.body
       );
       res.send(Categorie);
-    } else return res.status(400).send({ message: "Unauthorized" });
+    }
   }
 );
 /***************delete categorie ***************** */
@@ -86,15 +94,17 @@ router.delete(
   "/:id/delete/:idcat",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
-    const pme = await Pme.findById(req.params.id);
     const user = await User.findById(req.user.user);
-    if (!pme) return res.status(400).send({ message: "pme does not exist" });
+    const admin = await Admin.findById(req.user.admin);
 
-    if (!user) return res.status(400).send({ message: "Unauthorized" });
+    adminPme = admin ? admin.pme.find((p) => p == req.params.id) : undefined;
+    userPme = user ? user.pme == req.params.id : undefined;
 
-    await categorie.findByIdAndDelete(req.params.idcat);
+    if (adminPme || userPme) {
+      await categorie.findByIdAndDelete(req.params.idcat);
 
-    res.send({ message: "categorie deleted" });
+      res.send({ message: "categorie deleted" });
+    }
   }
 );
 
