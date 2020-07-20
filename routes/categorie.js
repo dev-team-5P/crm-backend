@@ -36,17 +36,21 @@ router.get(
     const admin = await Admin.findById(req.user.admin);
     const pageSizecat = +req.query.pagesize;
     const currentPage = +req.query.page;
-    const gategoriekQuery = Gategorie.find({ pme: req.params.id });
+    const gategoriekQuery = categorie.find({ pme: req.params.id });
 
     adminPme = admin ? admin.pme.find((p) => p == req.params.id) : undefined;
     userPme = user ? user.pme == req.params.id : undefined;
 
     if (adminPme || userPme) {
       if (pageSizecat && currentPage) {
-        gategoriekQuery.skip(pageSizecat * (currentPage - 1)).limit(pageSizecat);
+        gategoriekQuery
+          .skip(pageSizecat * (currentPage - 1))
+          .limit(pageSizecat);
       }
       const categ = await gategoriekQuery;
-      const catgkCount = await Categ.countDocuments({ pme: req.params.idPme });
+      const catgkCount = await categorie.countDocuments({
+        pme: req.params.idPme,
+      });
 
       res.send({ categ: categ, count: catgkCount });
       // const Categorie = await categorie.find({ pme: req.params.id });
