@@ -36,7 +36,7 @@ router.post("/:id/register", async (req, res) => {
   user.password = await bcrypt.hash(user.password, salt);
   await user.save();
 
-  await User.findByIdAndUpdate(user._id, { $push: { pme: pme._id } });
+  await User.findByIdAndUpdate(user._id, { pme: pme._id });
 
   res.send(user);
   const token_access = jwt.sign(
@@ -61,37 +61,45 @@ router.post("/:id/register", async (req, res) => {
   });
   let setting = await Setting.findOne();
   // if (setting.isActivSuperAdmin === true) {
-    //Creating a Nodemailer Transport instance
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      tls: {
-        rejectUnauthorized: false,
-      },
-      port: 465,
-      secure: false,
-      auth: {
-        user: config.mail,
-        pass: config.password,
-      },
-    });
-    const mailOptions = {
-      from: config.mail,
-      to: user.email,
-      subject: "New User account",
-      text:
-        "Hello,\n\n" +
-        "A new account was created by admin :" +"\n\n"+
-        "Name :" + user.name +"\n\n"+ "Email :"+ user.email +"\n\n"+"Password :"+ pass +
-        ".\n",
-    };
-    transporter.sendMail(mailOptions, function (err) {
-      if (err) {
-        return res.status(500).send({ msg: err.message });
-      }
-      res
-        .status(200)
-        .send("A verification email has been sent to " + user.email + ".");
-    });
+  //Creating a Nodemailer Transport instance
+  const transporter = nodemailer.createTransport({
+    service: "Gmail",
+    tls: {
+      rejectUnauthorized: false,
+    },
+    port: 465,
+    secure: false,
+    auth: {
+      user: config.mail,
+      pass: config.password,
+    },
+  });
+  const mailOptions = {
+    from: config.mail,
+    to: user.email,
+    subject: "New User account",
+    text:
+      "Hello,\n\n" +
+      "A new account was created by admin :" +
+      "\n\n" +
+      "Name :" +
+      user.name +
+      "\n\n" +
+      "Email :" +
+      user.email +
+      "\n\n" +
+      "Password :" +
+      pass +
+      ".\n",
+  };
+  transporter.sendMail(mailOptions, function (err) {
+    if (err) {
+      return res.status(500).send({ msg: err.message });
+    }
+    res
+      .status(200)
+      .send("A verification email has been sent to " + user.email + ".");
+  });
   // } else console.log("email notif is desactivated by super admin");
 });
 
