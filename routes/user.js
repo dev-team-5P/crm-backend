@@ -23,13 +23,10 @@ router.post("/:id/register", async (req, res) => {
       message: "pme does not exist",
     });
 
-  const unique = await User.findOne({
-    email: req.body.email,
-  }); // verifie si email est unique //
-  if (unique)
-    return res.status(400).send({
-      message: "email already in use",
-    });
+  const uniqueAdmin = await Admin.findOne({ email: req.body.email }); // verifie si email est unique //
+  const uniqueUser = await User.findOne({ email: req.body.email }); // verifie si email est unique //
+  if (uniqueAdmin || uniqueUser)
+    return res.status(400).send({ message: "email already in use" });
 
   const salt = await bcrypt.genSalt(10);
   const pass = user.password;
